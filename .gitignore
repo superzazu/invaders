@@ -1,0 +1,5 @@
+.DS_Store
+*.o
+invaders
+roms/invaders.*
+TODO.md
