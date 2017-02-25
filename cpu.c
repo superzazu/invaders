@@ -321,27 +321,25 @@ u8 cpu_step(i8080* m) {
 
         // rotate instructions
         case 0x07: { // RLC (rotate left)
-            u8 a = m->reg.A;
-            m->flag.CY = a >> 7;
-            m->reg.A = (a << 1) | m->flag.CY;
+            m->flag.CY = m->reg.A >> 7;
+            m->reg.A = (m->reg.A << 1) | m->flag.CY;
         } break;
 
         case 0x0F: { // RRC (rotate right)
-            u8 a = m->reg.A;
-            m->flag.CY = a & 1;
-            m->reg.A = (m->flag.CY << 7) | (a >> 1);
+            m->flag.CY = m->reg.A & 1;
+            m->reg.A = (m->reg.A >> 1) | (m->flag.CY << 7);
         } break;
 
         case 0x17: { // RAL
-            u8 a = m->reg.A;
-            m->reg.A = (a << 1) | m->flag.CY;
-            m->flag.CY = a >> 7;
+            const bool cy = m->flag.CY;
+            m->flag.CY = m->reg.A >> 7;
+            m->reg.A = (m->reg.A << 1) | cy;
         } break;
 
         case 0x1F: { // RAR
-            u8 a = m->reg.A;
-            m->reg.A = (m->flag.CY << 7) | (a >> 1);
-            m->flag.CY = a & 1;
+            const bool cy = m->flag.CY;
+            m->flag.CY = m->reg.A & 1;
+            m->reg.A = (m->reg.A >> 1) | (cy << 7);
         } break;
 
         // logical byte instructions
