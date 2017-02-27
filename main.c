@@ -86,10 +86,10 @@ int main(int argc, char **argv) {
         cpu_run_tests(&m, "roms/tests/TEST.COM");
         cpu_init(&m);
         cpu_run_tests(&m, "roms/tests/8080PRE.COM");
-        cpu_init(&m);
-        cpu_run_tests(&m, "roms/tests/CPUTEST.COM");
         // cpu_init(&m);
         // cpu_run_tests(&m, "roms/tests/8080EX1.COM");
+        cpu_init(&m);
+        cpu_run_tests(&m, "roms/tests/CPUTEST.COM");
         return 0;
     }
 

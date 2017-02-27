@@ -669,7 +669,8 @@ void cpu_inr(i8080* const m, u8* const reg) {
 
 void cpu_dcr(i8080* const m, u8* const reg) {
     i16 value = (*reg - 1) & 0xFF;
-    cpu_set_flags(m, S|Z|AC|P, value);
+    cpu_set_flags(m, S|Z|P, value);
+    m->flag.AC = !((value & 0x0F) == 0x0F);
     *reg = value;
 }
 
@@ -679,6 +680,7 @@ void cpu_ana(i8080* const m, const u8 value) {
     u8 result = m->reg.A & value;
     cpu_set_flags(m, S|Z|P, result);
     m->flag.CY = 0;
+    m->flag.AC = ((m->reg.A | value) & 0x08) != 0;
     m->reg.A = result;
 }
 
