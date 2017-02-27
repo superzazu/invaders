@@ -25,23 +25,26 @@ static void key_callback(GLFWwindow* window, int key, int scancode,
         if (key == GLFW_KEY_C) { // coin
             m.port1 = (1 << 0) | m.port1;
         }
-        // else if (key == x) { // P2 start button
-        //     m.port1 = (1 << 1) | m.port1;
-        // }
+        else if (key == GLFW_KEY_2) { // P2 start button
+            m.port1 = (1 << 1) | m.port1;
+        }
         else if (key == GLFW_KEY_ENTER) { // P1 start button
             m.port1 = (1 << 2) | m.port1;
         }
         // else if (key == x) { // ?
         //     m.port1 = (1 << 3) | m.port1;
         // }
-        else if (key == GLFW_KEY_SPACE) { // P1 shoot button
-            m.port1 = (1 << 4) | m.port1;
+        else if (key == GLFW_KEY_SPACE) {
+            m.port1 = (1 << 4) | m.port1; // P1 shoot button
+            m.port2 = (1 << 4) | m.port2; // P2 shoot button
         }
-        else if (key == GLFW_KEY_LEFT) { // P1 joystick left
-            m.port1 = (1 << 5) | m.port1;
+        else if (key == GLFW_KEY_LEFT) {
+            m.port1 = (1 << 5) | m.port1; // P1 joystick left
+            m.port2 = (1 << 5) | m.port2; // P2 joystick left
         }
-        else if (key == GLFW_KEY_RIGHT) { // P1 joystick right
-            m.port1 = (1 << 6) | m.port1;
+        else if (key == GLFW_KEY_RIGHT) {
+            m.port1 = (1 << 6) | m.port1; // P1 joystick right
+            m.port2 = (1 << 6) | m.port2; // P2 joystick right
         }
         // else if (key == x) { // ?
         //     m.port1 = (1 << 7) | m.port1;
@@ -51,21 +54,25 @@ static void key_callback(GLFWwindow* window, int key, int scancode,
         if (key == GLFW_KEY_C) { // coin
             m.port1 = 0b11111110 & m.port1;
         }
-        // else if (key == x) { // P2 start button
-        // }
+        else if (key == GLFW_KEY_2) { // P2 start button
+            m.port1 = 0b11111101 & m.port1;
+        }
         else if (key == GLFW_KEY_ENTER) { // P1 start button
             m.port1 = 0b11111011 & m.port1;
         }
         // else if (key == x) { // ?
         // }
-        else if (key == GLFW_KEY_SPACE) { // P1 shoot button
-            m.port1 = 0b11101111 & m.port1;
+        else if (key == GLFW_KEY_SPACE) {
+            m.port1 = 0b11101111 & m.port1; // P1 shoot button
+            m.port2 = 0b11101111 & m.port2; // P2 shoot button
         }
-        else if (key == GLFW_KEY_LEFT) { // P1 joystick left
-            m.port1 = 0b11011111 & m.port1;
+        else if (key == GLFW_KEY_LEFT) {
+            m.port1 = 0b11011111 & m.port1; // P1 joystick left
+            m.port2 = 0b11011111 & m.port2; // P2 joystick left
         }
-        else if (key == GLFW_KEY_RIGHT) { // P1 joystick right
-            m.port1 = 0b10111111 & m.port1;
+        else if (key == GLFW_KEY_RIGHT) {
+            m.port1 = 0b10111111 & m.port1; // P1 joystick right
+            m.port2 = 0b10111111 & m.port2; // P2 joystick right
         }
         // else if (key == x) { // ?
         // }

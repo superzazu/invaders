@@ -4,7 +4,7 @@ A Space Invaders emulator, written in C with OpenGL (and GLFW).
 
 ![space invaders demo](demo.gif)
 
-To run it: `make && ./invaders`. Keys are: `c` to insert a coin, `enter` to start a game, `left` / `right` to move, and `space` to shoot.
+To run it: `make && ./invaders`. Keys are: `c` to insert a coin, `enter` to start a game (`2` for two-player mode), `left` / `right` to move, and `space` to shoot.
 
 To run the tests, run with `--test`. The emulator passes the following tests:
 - [x] TST8080.COM
@@ -14,7 +14,6 @@ To run the tests, run with `--test`. The emulator passes the following tests:
 
 # To do
 
-- 2 player game
 - fix CPU to pass remaining tests
 - add sound
 - big-endian systems?
