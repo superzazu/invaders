@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-void cpu_init(i8080* m) {
+void cpu_init(i8080* const m) {
     memset(m->memory, 0, sizeof m->memory);
     m->reg.A = 0;
     m->reg.B = 0;
@@ -30,7 +30,7 @@ void cpu_init(i8080* m) {
     m->shift_offset = 0;
 }
 
-int cpu_load_file(i8080* m, const char* filename, const u16 start_addr) {
+int cpu_load_file(i8080* const m, const char* filename, const u16 start_addr) {
     FILE *f;
     long file_size = 0;
 
@@ -66,7 +66,7 @@ int cpu_load_file(i8080* m, const char* filename, const u16 start_addr) {
     return 0;
 }
 
-void cpu_set_flags(i8080* m, const u8 flags_mask, const i32 value) {
+void cpu_set_flags(i8080* const m, const u8 flags_mask, const i32 value) {
     if (flags_mask & S) {
         m->flag.S = (value & 0x80) == 0x80;
     }
@@ -84,7 +84,7 @@ void cpu_set_flags(i8080* m, const u8 flags_mask, const i32 value) {
     }
 }
 
-u8 cpu_step(i8080* m) {
+u8 cpu_step(i8080* const m) {
     u32 start_cycle_count = m->cycles_count; // to count the number of cycles
                                              // used for this opcode
                                              // (some cycle durations
@@ -544,7 +544,7 @@ u8 cpu_step(i8080* m) {
     return cycles_in_opcode;
 }
 
-void cpu_update(i8080* m) {
+void cpu_update(i8080* const m) {
     // emulates the correct number of cycles for one frame
     // function to execute every 1/60s
     u16 count = 0;
@@ -553,7 +553,7 @@ void cpu_update(i8080* m) {
     }
 }
 
-void cpu_run_tests(i8080* m, const char* filename) {
+void cpu_run_tests(i8080* const m, const char* filename) {
     cpu_init(m);
     cpu_load_file(m, filename, 0x100);
 
@@ -594,7 +594,7 @@ void cpu_run_tests(i8080* m, const char* filename) {
     }
 }
 
-void cpu_debug_output(i8080* m) {
+void cpu_debug_output(i8080* const m) {
     char flags[] = "......";
 
     if (m->flag.Z) flags[0] = 'z';
@@ -636,44 +636,44 @@ bool parity(const u8 value) {
     return (nb_one_bits & 1) == 0;
 }
 
-void cpu_jump(i8080* m, const u16 addr) {
+void cpu_jump(i8080* const m, const u16 addr) {
     m->pc = addr;
 }
 
-void cpu_call(i8080* m, const u16 addr) {
+void cpu_call(i8080* const m, const u16 addr) {
     mmu_push_stack(m, m->pc);
     cpu_jump(m, addr);
 }
 
-void cpu_ret(i8080* m) {
+void cpu_ret(i8080* const m) {
     m->pc = mmu_pop_stack(m);
 }
 
-void cpu_add(i8080* m, u8* const reg, const u8 value, const bool carry) {
+void cpu_add(i8080* const m, u8* const reg, const u8 value, const bool carry) {
     const u32 result = *reg + value + carry;
     cpu_set_flags(m, S|Z|AC|P|CY, result);
     *reg = result & 0xFF;
 }
 
-void cpu_sub(i8080* m, u8* const reg, const u8 value, const bool carry) {
+void cpu_sub(i8080* const m, u8* const reg, const u8 value, const bool carry) {
     const i32 result = *reg - value - carry;
     cpu_set_flags(m, S|Z|AC|P|CY, result);
     *reg = result & 0xFF;
 }
 
-void cpu_inr(i8080* m, u8* const reg) {
+void cpu_inr(i8080* const m, u8* const reg) {
     i16 value = (*reg + 1) & 0xFF;
     cpu_set_flags(m, S|Z|AC|P, value);
     *reg = value;
 }
 
-void cpu_dcr(i8080* m, u8* const reg) {
+void cpu_dcr(i8080* const m, u8* const reg) {
     i16 value = (*reg - 1) & 0xFF;
     cpu_set_flags(m, S|Z|AC|P, value);
     *reg = value;
 }
 
-void cpu_ana(i8080* m, const u8 value) {
+void cpu_ana(i8080* const m, const u8 value) {
     // executes a logic AND between reg A and a 8bit value, then stores the
     // result in reg A.
     u8 result = m->reg.A & value;
@@ -682,7 +682,7 @@ void cpu_ana(i8080* m, const u8 value) {
     m->reg.A = result;
 }
 
-void cpu_xra(i8080* m, const u8 value) {
+void cpu_xra(i8080* const m, const u8 value) {
     // executes a logic XOR between reg A and a 8bit value, then stores the
     // result in reg A.
     u8 result = m->reg.A ^ value;
@@ -692,7 +692,7 @@ void cpu_xra(i8080* m, const u8 value) {
     m->reg.A = result;
 }
 
-void cpu_ora(i8080* m, const u8 value) {
+void cpu_ora(i8080* const m, const u8 value) {
     // executes a logic OR between reg A and a 8bit value, then stores the
     // result in reg A.
     u8 result = m->reg.A | value;
@@ -702,13 +702,13 @@ void cpu_ora(i8080* m, const u8 value) {
     m->reg.A = result;
 }
 
-void cpu_cmp(i8080* m, const u8 value) {
+void cpu_cmp(i8080* const m, const u8 value) {
     // compares the reg A to another 8bit value.
     i16 result = m->reg.A - value;
     cpu_set_flags(m, S|Z|AC|P|CY, result);
 }
 
-void cpu_cond_jump(i8080* m, const bool condition) {
+void cpu_cond_jump(i8080* const m, const bool condition) {
     // jumps to next word in memory if condition == true
     u16 addr = mmu_next_word(m);
     if (condition) {
@@ -720,7 +720,7 @@ void cpu_cond_jump(i8080* m, const bool condition) {
     }
 }
 
-void cpu_cond_call(i8080* m, const bool condition) {
+void cpu_cond_call(i8080* const m, const bool condition) {
     // calls to next word in memory if condition == true
     u16 addr = mmu_next_word(m);
     if (condition) {
@@ -732,7 +732,7 @@ void cpu_cond_call(i8080* m, const bool condition) {
     }
 }
 
-void cpu_cond_ret(i8080* m, const bool condition) {
+void cpu_cond_ret(i8080* const m, const bool condition) {
     // return if condition == true
     if (condition) {
         cpu_ret(m);
@@ -743,7 +743,7 @@ void cpu_cond_ret(i8080* m, const bool condition) {
     }
 }
 
-void cpu_dad(i8080* m, const u16 value) {
+void cpu_dad(i8080* const m, const u16 value) {
     // adds 16bit integer to HL
     u32 result = mmu_get_hl(m) + value;
     mmu_set_hl(m, result & 0xFFFF);

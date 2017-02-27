@@ -9,35 +9,35 @@
 static const u16 CYCLES_PER_FRAME = 2000000 / 60; // 2Mhz at 60 fps
 static const u16 HALF_CYCLES_PER_FRAME = CYCLES_PER_FRAME / 2;
 
-void cpu_init(i8080* m);
-int cpu_load_file(i8080* m, const char* filename, const u16 start_addr);
+void cpu_init(i8080* const m);
+int cpu_load_file(i8080* const m, const char* filename, const u16 start_addr);
 
-void cpu_set_flags(i8080* m, const u8 flags, const i32 value);
-u8 cpu_step(i8080* m);
-void cpu_update(i8080* m);
+void cpu_set_flags(i8080* const m, const u8 flags, const i32 value);
+u8 cpu_step(i8080* const m);
+void cpu_update(i8080* const m);
 
-void cpu_run_tests(i8080* m, const char* filename);
-void cpu_debug_output(i8080* m);
+void cpu_run_tests(i8080* const m, const char* filename);
+void cpu_debug_output(i8080* const m);
 
 // helper functions
 bool parity(const u8 value);
 
-void cpu_jump(i8080* m, const u16 addr);
-void cpu_call(i8080* m, const u16 addr);
-void cpu_ret(i8080* m);
+void cpu_jump(i8080* const m, const u16 addr);
+void cpu_call(i8080* const m, const u16 addr);
+void cpu_ret(i8080* const m);
 
-void cpu_add(i8080* m, u8* const reg, const u8 value, const bool carry);
-void cpu_sub(i8080* m, u8* const reg, const u8 value, const bool carry);
-void cpu_inr(i8080* m, u8* const reg);
-void cpu_dcr(i8080* m, u8* const reg);
-void cpu_ana(i8080* m, const u8 value);
-void cpu_xra(i8080* m, const u8 value);
-void cpu_ora(i8080* m, const u8 value);
-void cpu_cmp(i8080* m, const u8 value);
-void cpu_cond_jump(i8080* m, const bool condition);
-void cpu_cond_call(i8080* m, const bool condition);
-void cpu_cond_ret(i8080* m, const bool condition);
-void cpu_dad(i8080* m, const u16 value);
+void cpu_add(i8080* const m, u8* const reg, const u8 value, const bool carry);
+void cpu_sub(i8080* const m, u8* const reg, const u8 value, const bool carry);
+void cpu_inr(i8080* const m, u8* const reg);
+void cpu_dcr(i8080* const m, u8* const reg);
+void cpu_ana(i8080* const m, const u8 value);
+void cpu_xra(i8080* const m, const u8 value);
+void cpu_ora(i8080* const m, const u8 value);
+void cpu_cmp(i8080* const m, const u8 value);
+void cpu_cond_jump(i8080* const m, const bool condition);
+void cpu_cond_call(i8080* const m, const bool condition);
+void cpu_cond_ret(i8080* const m, const bool condition);
+void cpu_dad(i8080* const m, const u16 value);
 
 static const int OPCODES_CYCLES[] = {
     // if 0 -> cycles are managed in opcode
