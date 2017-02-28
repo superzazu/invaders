@@ -1,7 +1,13 @@
+UNAME := $(shell uname)
 TARGET = invaders
-LIBS = -lGLFW -framework OpenGL
 CC = clang
 CFLAGS = -std=c11 -g -Wall
+ifeq ($(UNAME), Linux)
+LIBS = -lglfw -lGL
+endif
+ifeq ($(UNAME), Darwin)
+LIBS = -lglfw -framework OpenGL
+endif
 
 .PHONY: default all clean
 
