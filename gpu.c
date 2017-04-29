@@ -22,7 +22,7 @@ void gpu_draw(i8080* m) {
 
                 glBegin(GL_QUADS);
                     // color management
-                    if (py > 32 && py < 64) { // red
+                    if (py > 32 && py <= 64) { // red
                         glColor3f(1.f, 0.f, 0.f);
                     }
                     else if (py > 184 && py < 184 + 56) { // green
