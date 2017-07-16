@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <GLFW/glfw3.h>
 
 typedef uint8_t u8;
 typedef int8_t i8;
@@ -43,4 +44,7 @@ struct i8080 {
 
     u32 cycles_count;
     u8 next_interrupt;
+
+    float screen_buffer[224][256][3];
+    GLuint texture;
 };

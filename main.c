@@ -9,8 +9,8 @@
 #include "cpu.h"
 #include "gpu.h"
 
-const int EMU_WIDTH = 224;
-const int EMU_HEIGHT = 256;
+const int WIN_WIDTH = 224;
+const int WIN_HEIGHT = 256;
 const int FPS = 60;
 
 static i8080 m;
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
     }
 
     // create a window and its context
-    window = glfwCreateWindow(EMU_WIDTH * 2, EMU_HEIGHT * 2, "Space Invaders",
+    window = glfwCreateWindow(WIN_WIDTH * 2, WIN_HEIGHT * 2, "Space Invaders",
                               NULL, NULL);
     if (!window) {
         glfwTerminate();
@@ -119,21 +119,16 @@ int main(int argc, char **argv) {
     }
     glfwSetKeyCallback(window, key_callback);
 
-    glfwSetWindowSizeLimits(window, EMU_WIDTH, EMU_HEIGHT,
+    glfwSetWindowSizeLimits(window, WIN_WIDTH, WIN_HEIGHT,
                             GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwMakeContextCurrent(window);
 
-    // retrieve frame size for viewport
-    int frame_width, frame_height;
-    glfwGetFramebufferSize(window, &frame_width, &frame_height);
-
-    // setting up viewport and orthographic projection
-    glViewport(0, 0, frame_width, frame_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, EMU_WIDTH, EMU_HEIGHT, 0, -1, 1);
 
     glfwSwapInterval(1);
+
+    gpu_init(&m);
 
     float step_timer = glfwGetTime();
     while (!glfwWindowShouldClose(window))
@@ -148,6 +143,7 @@ int main(int argc, char **argv) {
             // (+10 to boost up the game's speed a little)
             step_timer = glfwGetTime();
             cpu_update(&m);
+            gpu_update(&m);
         }
     }
 
