@@ -1,152 +1,187 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
 
-#include <GLFW/glfw3.h>
+#include "8080/types.h"
+#include "invaders.h"
+#include "audio.h"
 
-#include "types.h"
-#include "cpu.h"
-#include "gpu.h"
-
-const int WIN_WIDTH = 224;
-const int WIN_HEIGHT = 256;
-const int FPS = 60;
-
-static i8080 m;
-
-static void error_callback(int error, const char* description) {
-    fprintf(stderr, "error: %s\n", description);
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode,
-                         int action, int mods) {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        if (key == GLFW_KEY_C) { // coin
-            m.port1 = (1 << 0) | m.port1;
-        }
-        else if (key == GLFW_KEY_2) { // P2 start button
-            m.port1 = (1 << 1) | m.port1;
-        }
-        else if (key == GLFW_KEY_ENTER) { // P1 start button
-            m.port1 = (1 << 2) | m.port1;
-        }
-        // else if (key == x) { // ?
-        //     m.port1 = (1 << 3) | m.port1;
-        // }
-        else if (key == GLFW_KEY_SPACE) {
-            m.port1 = (1 << 4) | m.port1; // P1 shoot button
-            m.port2 = (1 << 4) | m.port2; // P2 shoot button
-        }
-        else if (key == GLFW_KEY_LEFT) {
-            m.port1 = (1 << 5) | m.port1; // P1 joystick left
-            m.port2 = (1 << 5) | m.port2; // P2 joystick left
-        }
-        else if (key == GLFW_KEY_RIGHT) {
-            m.port1 = (1 << 6) | m.port1; // P1 joystick right
-            m.port2 = (1 << 6) | m.port2; // P2 joystick right
-        }
-        // else if (key == x) { // ?
-        //     m.port1 = (1 << 7) | m.port1;
-        // }
-    }
-    else if (action == GLFW_RELEASE) {
-        if (key == GLFW_KEY_C) { // coin
-            m.port1 = 0b11111110 & m.port1;
-        }
-        else if (key == GLFW_KEY_2) { // P2 start button
-            m.port1 = 0b11111101 & m.port1;
-        }
-        else if (key == GLFW_KEY_ENTER) { // P1 start button
-            m.port1 = 0b11111011 & m.port1;
-        }
-        // else if (key == x) { // ?
-        // }
-        else if (key == GLFW_KEY_SPACE) {
-            m.port1 = 0b11101111 & m.port1; // P1 shoot button
-            m.port2 = 0b11101111 & m.port2; // P2 shoot button
-        }
-        else if (key == GLFW_KEY_LEFT) {
-            m.port1 = 0b11011111 & m.port1; // P1 joystick left
-            m.port2 = 0b11011111 & m.port2; // P2 joystick left
-        }
-        else if (key == GLFW_KEY_RIGHT) {
-            m.port1 = 0b10111111 & m.port1; // P1 joystick right
-            m.port2 = 0b10111111 & m.port2; // P2 joystick right
-        }
-        // else if (key == x) { // ?
-        // }
-    }
-}
+static invaders si;
 
 int main(int argc, char **argv) {
-    // run tests
-    if (argc == 2 && !strcmp(argv[1], "--test")) {
-        cpu_init(&m);
-        cpu_run_tests(&m, "roms/tests/TEST.COM");
-        cpu_init(&m);
-        cpu_run_tests(&m, "roms/tests/8080PRE.COM");
-        // cpu_init(&m);
-        // cpu_run_tests(&m, "roms/tests/8080EX1.COM");
-        cpu_init(&m);
-        cpu_run_tests(&m, "roms/tests/CPUTEST.COM");
-        return 0;
+    // SDL init
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        return 1;
+    }
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+    // create SDL window
+    SDL_Window* window = SDL_CreateWindow("Space Invaders",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        WIN_WIDTH * 2,
+        WIN_HEIGHT * 2,
+        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+    if (window == NULL) {
+        SDL_Log("Unable to create window: %s", SDL_GetError());
+        return 1;
     }
 
-    cpu_init(&m);
-    if (cpu_load_file(&m, "roms/invaders.h", 0x0000) != 0) return -1;
-    if (cpu_load_file(&m, "roms/invaders.g", 0x0800) != 0) return -1;
-    if (cpu_load_file(&m, "roms/invaders.f", 0x1000) != 0) return -1;
-    if (cpu_load_file(&m, "roms/invaders.e", 0x1800) != 0) return -1;
+    // create OpenGL context
+    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-    // GLFW setup
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-    GLFWwindow* window;
-    glfwSetErrorCallback(error_callback);
-
-    if (!glfwInit()) {
-        return -1;
+    if (gl_context == NULL) {
+        SDL_Log("Unable to create OpenGL context: %s", SDL_GetError());
+        return 1;
     }
 
-    // create a window and its context
-    window = glfwCreateWindow(WIN_WIDTH * 2, WIN_HEIGHT * 2, "Space Invaders",
-                              NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return -1;
+    // set vsync
+    if (SDL_GL_SetSwapInterval(1) < 0) {
+        SDL_Log("Unable to set vsync: %s", SDL_GetError());
     }
-    glfwSetKeyCallback(window, key_callback);
 
-    glfwSetWindowSizeLimits(window, WIN_WIDTH, WIN_HEIGHT,
-                            GLFW_DONT_CARE, GLFW_DONT_CARE);
-    glfwMakeContextCurrent(window);
-
+    // OpenGL init
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadIdentity();
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glViewport(0, 0, WIN_WIDTH * 2, WIN_HEIGHT * 2);
 
-    glfwSwapInterval(1);
+    // audio init
+    audio_init();
 
-    gpu_init(&m);
+    // game init
+    invaders_init(&si);
+    invaders_gpu_init(&si);
 
-    float step_timer = glfwGetTime();
-    while (!glfwWindowShouldClose(window))
-    {
-        glClear(GL_COLOR_BUFFER_BIT);
-        gpu_draw(&m);
-        glfwSwapBuffers(window);
+    char *base_path = SDL_GetBasePath();
+    char *file1 = "roms/invaders.h";
+    char *file2 = "roms/invaders.g";
+    char *file3 = "roms/invaders.f";
+    char *file4 = "roms/invaders.e";
 
-        glfwPollEvents();
+    int BUF_SIZE = strlen(base_path) + strlen(file1) + 1;
+    char *full_path = malloc(BUF_SIZE);
 
-        if (glfwGetTime() - step_timer > 1.f / (FPS + 10)) {
-            // (+10 to boost up the game's speed a little)
-            step_timer = glfwGetTime();
-            cpu_update(&m);
-            gpu_update(&m);
+    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file1);
+    if (invaders_load_rom(full_path, 0x0000) != 0) return 1;
+
+    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file2);
+    if (invaders_load_rom(full_path, 0x0800) != 0) return 1;
+
+    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file3);
+    if (invaders_load_rom(full_path, 0x1000) != 0) return 1;
+
+    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file4);
+    if (invaders_load_rom(full_path, 0x1800) != 0) return 1;
+
+    free(full_path);
+    free(base_path);
+
+    // main loop
+    bool quit = false;
+    SDL_Event e;
+    u32 timer = SDL_GetTicks();
+
+    while (!quit) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = true;
+            }
+            else if (e.type == SDL_WINDOWEVENT &&
+                     e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                glViewport(0, 0, e.window.data1, e.window.data2);
+            }
+            else if (e.type == SDL_KEYDOWN) {
+                const u32 key = e.key.keysym.sym;
+                if (key == SDLK_c) { // coin
+                    si.port1 = (1 << 0) | si.port1;
+                }
+                else if (key == SDLK_2) { // P2 start button
+                    si.port1 = (1 << 1) | si.port1;
+                }
+                else if (key == SDLK_RETURN) { // P1 start button
+                    si.port1 = (1 << 2) | si.port1;
+                }
+                // else if (key == x) { // ?
+                //     si.port1 = (1 << 3) | si.port1;
+                // }
+                else if (key == SDLK_SPACE) {
+                    si.port1 = (1 << 4) | si.port1; // P1 shoot button
+                    si.port2 = (1 << 4) | si.port2; // P2 shoot button
+                }
+                else if (key == SDLK_LEFT) {
+                    si.port1 = (1 << 5) | si.port1; // P1 joystick left
+                    si.port2 = (1 << 5) | si.port2; // P2 joystick left
+                }
+                else if (key == SDLK_RIGHT) {
+                    si.port1 = (1 << 6) | si.port1; // P1 joystick right
+                    si.port2 = (1 << 6) | si.port2; // P2 joystick right
+                }
+                else if (key == SDLK_t) {
+                    si.port2 |= (1 << 2); // tilt
+                }
+                // else if (key == x) { // ?
+                //     si.port1 = (1 << 7) | si.port1;
+                // }
+                else if (key == SDLK_F9) { // to toggle between b&w / color
+                    si.colored_screen = !si.colored_screen;
+                }
+            }
+            else if (e.type == SDL_KEYUP) {
+                const u32 key = e.key.keysym.sym;
+                if (key == SDLK_c) { // coin
+                    si.port1 = 0b11111110 & si.port1;
+                }
+                else if (key == SDLK_2) { // P2 start button
+                    si.port1 = 0b11111101 & si.port1;
+                }
+                else if (key == SDLK_RETURN) { // P1 start button
+                    si.port1 = 0b11111011 & si.port1;
+                }
+                // else if (key == x) { // ?
+                // }
+                else if (key == SDLK_SPACE) {
+                    si.port1 = 0b11101111 & si.port1; // P1 shoot button
+                    si.port2 = 0b11101111 & si.port2; // P2 shoot button
+                }
+                else if (key == SDLK_LEFT) {
+                    si.port1 = 0b11011111 & si.port1; // P1 joystick left
+                    si.port2 = 0b11011111 & si.port2; // P2 joystick left
+                }
+                else if (key == SDLK_RIGHT) {
+                    si.port1 = 0b10111111 & si.port1; // P1 joystick right
+                    si.port2 = 0b10111111 & si.port2; // P2 joystick right
+                }
+                else if (key == SDLK_t) {
+                    si.port2 &= ~(1 << 2); // tilt
+                }
+                // else if (key == x) { // ?
+                // }
+            }
         }
+
+        // update the game for each frame (every 1/60 seconds)
+        if (SDL_GetTicks() - timer > (1 / FPS) * 1000) {
+            timer = SDL_GetTicks();
+            invaders_update(&si);
+            invaders_gpu_update(&si);
+        }
+
+        // render
+        glClear(GL_COLOR_BUFFER_BIT);
+        invaders_gpu_draw(&si);
+
+        SDL_GL_SwapWindow(window);
     }
 
-    glfwTerminate();
+    audio_quit();
+    SDL_DestroyWindow(window);
+    window = NULL;
+    SDL_Quit();
+
     return 0;
 }

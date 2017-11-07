@@ -2,4 +2,5 @@
 *.o
 invaders
 roms/invaders.*
+roms/snd/*
 TODO.md
