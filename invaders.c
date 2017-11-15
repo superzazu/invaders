@@ -261,7 +261,7 @@ int invaders_load_rom(const char* filename, const u16 start_addr) {
 
     f = fopen (filename, "rb");
     if (f == NULL) {
-        fprintf("error: can't open ROM file '%s'\n", filename);
+        fprintf(stderr, "error: can't open ROM file '%s'\n", filename);
         return 1;
     }
 
@@ -271,7 +271,8 @@ int invaders_load_rom(const char* filename, const u16 start_addr) {
     rewind(f);
 
     if (file_size > 0xFFFF) {
-        fprintf("error: rom file '%s' too big to fit in memory\n", filename);
+        fprintf(stderr, "error: rom file '%s' too big to fit in memory\n",
+                filename);
         return 1;
     }
 
@@ -279,7 +280,7 @@ int invaders_load_rom(const char* filename, const u16 start_addr) {
     u8 buffer[file_size];
     size_t result = fread(buffer, 1, file_size, f);
     if (result != file_size) {
-        fprintf("error: while reading ROM file '%s'\n", filename);
+        fprintf(stderr, "error: while reading ROM file '%s'\n", filename);
         return 1;
     }
 
