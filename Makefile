@@ -1,6 +1,6 @@
 UNAME := $(shell uname)
 TARGET = invaders
-CC = clang
+CC = cc
 CFLAGS = -g -Wall -O3
 LIBS = `pkg-config --cflags --libs sdl2 SDL2_mixer`
 
