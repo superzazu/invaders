@@ -6,7 +6,7 @@ void invaders_init(invaders* const si) {
     si->cpu.read_byte = invaders_rb;
     si->cpu.write_byte = invaders_wb;
     si->next_interrupt = 0x08;
-    si->port1 = 0;
+    si->port1 = 1 << 3; // bit 3 is always set
     si->port2 = 0;
     si->shift0 = 0;
     si->shift1 = 0;
@@ -49,7 +49,7 @@ void invaders_update(invaders* const si) {
     u32 count_cycles = 0;
 
     while (count_cycles <= CYCLES_PER_FRAME) {
-        u32 start_cyc = si->cpu.cyc;
+        const u32 start_cyc = si->cpu.cyc;
         const u8 opcode = i8080_rb(&si->cpu, si->cpu.pc);
 
         i8080_step(&si->cpu);
@@ -62,10 +62,10 @@ void invaders_update(invaders* const si) {
             const u8 port = i8080_next_byte(&si->cpu);
             u8 value = 0;
 
-            if (port == 1) { // button presses
+            if (port == 1) {
                 value = si->port1;
             }
-            else if (port == 2) { // game settings
+            else if (port == 2) {
                 value = si->port2;
             }
             else if (port == 3) {
@@ -95,7 +95,7 @@ void invaders_update(invaders* const si) {
                 invaders_play_sound(si, 2);
             }
             else if (port == 6) {
-                // unused port (debug port?)
+                // debug port?
             }
             else {
                 fprintf(stderr, "error: unknown OUT port %02X\n", port);
@@ -240,19 +240,11 @@ void invaders_play_sound(invaders* const si, const u8 bank) {
 
 // memory handling
 u8 invaders_rb(const u16 addr) {
-    if (addr >= 0x4000) { // RAM mirror
-        return memory[addr - 0x4000];
-    }
     return memory[addr];
 }
 
 void invaders_wb(const u16 addr, const u8 val) {
-    if (addr >= 0x4000) { // RAM mirror
-        memory[addr - 0x4000] = val;
-    }
-    else {
-        memory[addr] = val;
-    }
+    memory[addr] = val;
 }
 
 int invaders_load_rom(const char* filename, const u16 start_addr) {

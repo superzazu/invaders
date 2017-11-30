@@ -1,6 +1,4 @@
 .DS_Store
 *.o
 invaders
-roms/invaders.*
-roms/snd/*
-TODO.md
+roms

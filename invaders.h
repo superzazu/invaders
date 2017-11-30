@@ -14,7 +14,7 @@
 #define WIN_HEIGHT 256
 #define FPS 60
 
-#define CYCLES_PER_FRAME 2000000 / 60 // 2Mhz at 60 fps
+#define CYCLES_PER_FRAME 2000000 / FPS // 2Mhz at 60 fps
 #define HALF_CYCLES_PER_FRAME CYCLES_PER_FRAME / 2
 
 typedef struct invaders {
