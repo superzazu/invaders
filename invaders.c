@@ -1,10 +1,11 @@
 #include "invaders.h"
 
 void invaders_init(invaders* const si) {
-    memset(memory, 0, sizeof memory);
+    memset(si->memory, 0, sizeof si->memory);
     i8080_init(&si->cpu);
     si->cpu.read_byte = invaders_rb;
     si->cpu.write_byte = invaders_wb;
+    si->cpu.userdata = si;
     si->next_interrupt = 0x08;
     si->port1 = 1 << 3; // bit 3 is always set
     si->port2 = 0;
@@ -50,7 +51,7 @@ void invaders_update(invaders* const si) {
 
     while (count_cycles <= CYCLES_PER_FRAME) {
         const u32 start_cyc = si->cpu.cyc;
-        const u8 opcode = i8080_rb(&si->cpu, si->cpu.pc);
+        const u8 opcode = invaders_rb(si, si->cpu.pc);
 
         i8080_step(&si->cpu);
 
@@ -59,7 +60,7 @@ void invaders_update(invaders* const si) {
         // Space Invaders special opcodes (IN/OUT)
         switch (opcode) {
         case 0xDB: { // IN
-            const u8 port = i8080_next_byte(&si->cpu);
+            const u8 port = invaders_rb(si, si->cpu.pc++);
             u8 value = 0;
 
             if (port == 1) {
@@ -78,7 +79,7 @@ void invaders_update(invaders* const si) {
             si->cpu.a = value;
         } break;
         case 0xD3: { // OUT
-            const u8 port = i8080_next_byte(&si->cpu);
+            const u8 port = invaders_rb(si, si->cpu.pc++);
             const u8 value = si->cpu.a;
 
             if (port == 2) {
@@ -106,11 +107,7 @@ void invaders_update(invaders* const si) {
         // interrupts handling: every HALF_CYCLES_PER_FRAME cycles, an
         // interrupt is generated (0x08 and 0x10) if the iff == 1
         if (si->cpu.cyc >= HALF_CYCLES_PER_FRAME) {
-            if (si->cpu.iff) {
-                // generate interrupt
-                si->cpu.iff = 0;
-                i8080_call(&si->cpu, si->next_interrupt);
-            }
+            i8080_interrupt(&si->cpu, si->next_interrupt);
             si->cpu.cyc -= HALF_CYCLES_PER_FRAME;
             si->next_interrupt = si->next_interrupt == 0x08 ? 0x10 : 0x08;
         }
@@ -119,8 +116,8 @@ void invaders_update(invaders* const si) {
 
 void invaders_gpu_init(invaders* const si) {
     // initialising the screen buffer with zeroes
-    for (int x=0; x<256; x++) {
-        for (int y=0; y<224; y++) {
+    for (int x = 0; x < 256; x++) {
+        for (int y = 0; y < 224; y++) {
             si->screen_buffer[y][x][0] = 0;
             si->screen_buffer[y][x][1] = 0;
             si->screen_buffer[y][x][2] = 0;
@@ -144,7 +141,7 @@ void invaders_gpu_update(invaders* const si) {
     for (int i = 0; i < 256 * 224 / 8; i++) {
         const int y = i * 8 / 256;
         const int base_x = (i * 8) % 256;
-        const u8 cur_byte = memory[start_addr + i];
+        const u8 cur_byte = si->memory[start_addr + i];
 
         for (u8 bit = 0; bit < 8; bit++) {
             const int px = base_x + bit;
@@ -239,17 +236,20 @@ void invaders_play_sound(invaders* const si, const u8 bank) {
 }
 
 // memory handling
-u8 invaders_rb(const u16 addr) {
-    return memory[addr];
+u8 invaders_rb(void* userdata, const u16 addr) {
+    invaders* const si = (invaders*) userdata;
+    return si->memory[addr];
 }
 
-void invaders_wb(const u16 addr, const u8 val) {
-    memory[addr] = val;
+void invaders_wb(void* userdata, const u16 addr, const u8 val) {
+    invaders* const si = (invaders*) userdata;
+    si->memory[addr] = val;
 }
 
-int invaders_load_rom(const char* filename, const u16 start_addr) {
+int invaders_load_rom(invaders* const si, const char* filename,
+                      const u16 start_addr) {
     FILE *f;
-    long file_size = 0;
+    size_t file_size = 0;
 
     f = fopen (filename, "rb");
     if (f == NULL) {
@@ -277,8 +277,8 @@ int invaders_load_rom(const char* filename, const u16 start_addr) {
     }
 
     // copy buffer to memory
-    for (int i = 0; i < file_size; i++) {
-        memory[start_addr + i] = buffer[i];
+    for (size_t i = 0; i < file_size; i++) {
+        si->memory[start_addr + i] = buffer[i];
     }
 
     fclose(f);

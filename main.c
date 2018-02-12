@@ -1,15 +1,15 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include "8080/types.h"
 #include "invaders.h"
 #include "audio.h"
 
+static const int JOYSTICK_DEAD_ZONE = 8000;
 static invaders si;
 
 int main(int argc, char **argv) {
     // SDL init
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return 1;
     }
@@ -50,6 +50,18 @@ int main(int argc, char **argv) {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glViewport(0, 0, WIN_WIDTH * 2, WIN_HEIGHT * 2);
 
+    // joystick init
+    SDL_Joystick *joystick = NULL;
+    if (SDL_NumJoysticks() > 0) {
+        joystick = SDL_JoystickOpen(0);
+
+        if (joystick) {
+            SDL_Log("opened joystick 0");
+        }
+        else {
+            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "opening joystick 0");
+        }
+    }
     // audio init
     audio_init();
 
@@ -57,6 +69,7 @@ int main(int argc, char **argv) {
     invaders_init(&si);
     invaders_gpu_init(&si);
 
+    // loading roms
     char *base_path = SDL_GetBasePath();
     char *file1 = "roms/invaders.h";
     char *file2 = "roms/invaders.g";
@@ -69,16 +82,16 @@ int main(int argc, char **argv) {
     char *full_path = malloc(BUF_SIZE);
 
     snprintf(full_path, BUF_SIZE, "%s%s", base_path, file1);
-    if (invaders_load_rom(full_path, 0x0000) != 0) return 1;
+    if (invaders_load_rom(&si, full_path, 0x0000) != 0) return 1;
 
     snprintf(full_path, BUF_SIZE, "%s%s", base_path, file2);
-    if (invaders_load_rom(full_path, 0x0800) != 0) return 1;
+    if (invaders_load_rom(&si, full_path, 0x0800) != 0) return 1;
 
     snprintf(full_path, BUF_SIZE, "%s%s", base_path, file3);
-    if (invaders_load_rom(full_path, 0x1000) != 0) return 1;
+    if (invaders_load_rom(&si, full_path, 0x1000) != 0) return 1;
 
     snprintf(full_path, BUF_SIZE, "%s%s", base_path, file4);
-    if (invaders_load_rom(full_path, 0x1800) != 0) return 1;
+    if (invaders_load_rom(&si, full_path, 0x1800) != 0) return 1;
 
     // test rom
     snprintf(full_path, BUF_SIZE, "%s%s", base_path, file_test2);
@@ -158,6 +171,76 @@ int main(int argc, char **argv) {
                     si.port2 &= 0b11111011; // tilt
                 }
             }
+            else if (e.type == SDL_JOYAXISMOTION) {
+                if (e.jaxis.axis == 0) { // x axis
+                    if (e.jaxis.value < -JOYSTICK_DEAD_ZONE) {
+                        si.port1 |= 1 << 5; // P1 joystick left
+                        si.port2 |= 1 << 5; // P2 joystick left
+                    }
+                    else if (e.jaxis.value > JOYSTICK_DEAD_ZONE) {
+                        si.port1 |= 1 << 6; // P1 joystick right
+                        si.port2 |= 1 << 6; // P2 joystick right
+                    }
+                    else {
+                        si.port1 &= 0b11011111; // P1 joystick left
+                        si.port2 &= 0b11011111; // P2 joystick left
+
+                        si.port1 &= 0b10111111; // P1 joystick right
+                        si.port2 &= 0b10111111; // P2 joystick right
+                    }
+                }
+            }
+            else if (e.type == SDL_JOYBUTTONDOWN) {
+                if (e.jbutton.button == 1) { // B
+                    si.port1 |= 1 << 0; // coin
+                }
+                else if (e.jbutton.button == 0) {
+                    si.port1 |= 1 << 4; // P1 shoot button
+                    si.port2 |= 1 << 4; // P2 shoot button
+                }
+                else if (e.jbutton.button == 8) { // start
+                    si.port1 |= 1 << 2; // P1 start button
+                }
+                else if (e.jbutton.button == 9) { // select
+                    si.port1 |= 1 << 1; // P2 start button
+                }
+                else if (e.jbutton.button == 13) {
+                    si.port1 |= 1 << 5; // P1 joystick left
+                    si.port2 |= 1 << 5; // P2 joystick left
+                }
+                else if (e.jbutton.button == 14) {
+                    si.port1 |= 1 << 6; // P1 joystick right
+                    si.port2 |= 1 << 6; // P2 joystick right
+                }
+                else if (e.jbutton.button == 4) { // LB
+                    // to toggle between b&w / color
+                    si.colored_screen = !si.colored_screen;
+                }
+                // printf("%d\n", e.jbutton.button);
+            }
+            else if (e.type == SDL_JOYBUTTONUP) {
+                if (e.jbutton.button == 1) { // B
+                    si.port1 &= 0b11111110; // coin
+                }
+                else if (e.jbutton.button == 0) {
+                    si.port1 &= 0b11101111; // P1 shoot button
+                    si.port2 &= 0b11101111; // P2 shoot button
+                }
+                else if (e.jbutton.button == 8) { // start
+                    si.port1 &= 0b11111011; // P1 start button
+                }
+                else if (e.jbutton.button == 9) { // select
+                    si.port1 &= 0b11111101; // P2 start button
+                }
+                else if (e.jbutton.button == 13) {
+                    si.port1 &= 0b11011111; // P1 joystick left
+                    si.port2 &= 0b11011111; // P2 joystick left
+                }
+                else if (e.jbutton.button == 14) {
+                    si.port1 &= 0b10111111; // P1 joystick right
+                    si.port2 &= 0b10111111; // P2 joystick right
+                }
+            }
         }
 
         // update the game for each frame (every 1/60 seconds)
@@ -174,7 +257,12 @@ int main(int argc, char **argv) {
         SDL_GL_SwapWindow(window);
     }
 
+    if (joystick) {
+        SDL_JoystickClose(joystick);
+    }
+
     audio_quit();
+    SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     window = NULL;
     SDL_Quit();

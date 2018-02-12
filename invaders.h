@@ -7,7 +7,6 @@
 
 #include "audio.h"
 
-#include "8080/types.h"
 #include "8080/i8080.h"
 
 #define WIN_WIDTH 224
@@ -18,8 +17,8 @@
 #define HALF_CYCLES_PER_FRAME CYCLES_PER_FRAME / 2
 
 typedef struct invaders {
-    // u8 memory[0x10000];
     i8080 cpu;
+    u8 memory[0x10000];
 
     u8 next_interrupt;
     float screen_buffer[224][256][3];
@@ -41,9 +40,9 @@ void invaders_gpu_draw(invaders* const si);
 void invaders_play_sound(invaders* const si, const u8 bank);
 
 // memory handling
-static u8 memory[0x10000] = {0};
-u8 invaders_rb(const u16 addr);
-void invaders_wb(const u16 addr, const u8 val);
-int invaders_load_rom(const char* filename, const u16 start_addr);
+u8 invaders_rb(void* userdata, const u16 addr);
+void invaders_wb(void* userdata, const u16 addr, const u8 val);
+int invaders_load_rom(invaders* const si, const char* filename,
+                      const u16 start_addr);
 
 #endif  // SPACEI_INVADERS_H

@@ -1,33 +1,29 @@
-UNAME := $(shell uname)
-TARGET = invaders
+BIN = invaders
 CC = cc
-CFLAGS = -g -Wall -O3
-LIBS = `pkg-config --cflags --libs sdl2 SDL2_mixer`
+CFLAGS = -g -Wall -Wextra -O3 -std=c11 $(shell pkg-config --cflags sdl2)
+LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_mixer)
+UNAME = $(shell uname -s)
 
 # add OpenGL
 ifeq ($(UNAME), Linux)
-LIBS += -lGL
+LDFLAGS += -lGL
 endif
 ifeq ($(UNAME), Darwin)
-LIBS += -framework OpenGL
+LDFLAGS += -framework OpenGL
 endif
 
-.PHONY: default all clean
-
-default: $(TARGET)
-all: default
-
 SOURCES = main.c invaders.c 8080/i8080.c audio.c
-HEADERS = invaders.h 8080/i8080.h 8080/types.h audio.h
+OBJECTS = $(SOURCES:.c=.o)
 
-%.o: %.c $(HEADERS)
+.PHONY: clean
+
+default: $(BIN)
+
+$(BIN): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(BIN) $(OBJECTS) $(LDFLAGS)
+
+.c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PRECIOUS: $(TARGET) $(SOURCES)
-
-$(TARGET): $(SOURCES)
-	$(CC) $(SOURCES) -Wall $(LIBS) -o $@
-
 clean:
-	-rm -f *.o
-	-rm -f $(TARGET)
+	rm -f $(BIN) *.o
