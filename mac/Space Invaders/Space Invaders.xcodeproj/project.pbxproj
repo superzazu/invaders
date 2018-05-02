@@ -7,6 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E568A25B209B7B4B0024DF1D /* invaders.f in Sources */ = {isa = PBXBuildFile; fileRef = E568A1EF209B7B4B0024DF1D /* invaders.f */; };
+		E568A2E1209B7CCF0024DF1D /* invaders.g in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A1ED209B7B4B0024DF1D /* invaders.g */; };
+		E568A2E2209B7CCF0024DF1D /* invaders.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A1EE209B7B4B0024DF1D /* invaders.h */; };
+		E568A2E3209B7CCF0024DF1D /* invaders.f in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A1EF209B7B4B0024DF1D /* invaders.f */; };
+		E568A2E4209B7CCF0024DF1D /* invaders.e in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A1F7209B7B4B0024DF1D /* invaders.e */; };
+		E568A2E6209B7CDE0024DF1D /* 16.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BA209B7C520024DF1D /* 16.wav */; };
+		E568A2E7209B7CDE0024DF1D /* 17.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BB209B7C520024DF1D /* 17.wav */; };
+		E568A2E8209B7CDE0024DF1D /* 15.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BC209B7C520024DF1D /* 15.wav */; };
+		E568A2E9209B7CDE0024DF1D /* 14.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BD209B7C520024DF1D /* 14.wav */; };
+		E568A2EA209B7CDE0024DF1D /* 10.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BE209B7C520024DF1D /* 10.wav */; };
+		E568A2EB209B7CDE0024DF1D /* 11.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2BF209B7C520024DF1D /* 11.wav */; };
+		E568A2EC209B7CDE0024DF1D /* 13.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C0209B7C520024DF1D /* 13.wav */; };
+		E568A2ED209B7CDE0024DF1D /* 12.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C1209B7C520024DF1D /* 12.wav */; };
+		E568A2EE209B7CDE0024DF1D /* 9.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C2209B7C520024DF1D /* 9.wav */; };
+		E568A2EF209B7CDE0024DF1D /* 8.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C3209B7C520024DF1D /* 8.wav */; };
+		E568A2F0209B7CDE0024DF1D /* 6.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C4209B7C520024DF1D /* 6.wav */; };
+		E568A2F1209B7CDE0024DF1D /* 7.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C5209B7C520024DF1D /* 7.wav */; };
+		E568A2F2209B7CDE0024DF1D /* 5.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C6209B7C520024DF1D /* 5.wav */; };
+		E568A2F3209B7CDE0024DF1D /* 4.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C7209B7C520024DF1D /* 4.wav */; };
+		E568A2F4209B7CDE0024DF1D /* 0.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C8209B7C520024DF1D /* 0.wav */; };
+		E568A2F5209B7CDE0024DF1D /* 1.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2C9209B7C520024DF1D /* 1.wav */; };
+		E568A2F6209B7CDE0024DF1D /* 3.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2CA209B7C520024DF1D /* 3.wav */; };
+		E568A2F7209B7CDE0024DF1D /* 2.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2CB209B7C520024DF1D /* 2.wav */; };
+		E568A2F8209B7CDE0024DF1D /* 18.wav in CopyFiles */ = {isa = PBXBuildFile; fileRef = E568A2CC209B7C520024DF1D /* 18.wav */; };
 		E56EDBEF1FB4B0690017546D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E56EDBEE1FB4B0690017546D /* Assets.xcassets */; };
 		E56EDC201FB4B1430017546D /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = E56EDC1B1FB4B1430017546D /* audio.c */; };
 		E56EDC211FB4B1430017546D /* invaders.c in Sources */ = {isa = PBXBuildFile; fileRef = E56EDC1D1FB4B1430017546D /* invaders.c */; };
@@ -15,13 +39,52 @@
 		E56EDC2C1FB4B1AE0017546D /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E56EDC2B1FB4B1AE0017546D /* SDL2.framework */; };
 		E56EDC2E1FB4B1BC0017546D /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E56EDC2D1FB4B1BC0017546D /* OpenGL.framework */; };
 		E56EDC301FB4B1CE0017546D /* SDL2.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56EDC2B1FB4B1AE0017546D /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		E56EDC321FB4B2D00017546D /* roms in Resources */ = {isa = PBXBuildFile; fileRef = E56EDC311FB4B2D00017546D /* roms */; };
-		E56EDC341FB4B2E60017546D /* roms in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56EDC311FB4B2D00017546D /* roms */; };
 		E571B5641FB75F1300B51BAD /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E571B5631FB75F1300B51BAD /* SDL2_mixer.framework */; };
 		E571B5651FB75F1D00B51BAD /* SDL2_mixer.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = E571B5631FB75F1300B51BAD /* SDL2_mixer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E568A2E0209B7CC30024DF1D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = roms;
+			dstSubfolderSpec = 7;
+			files = (
+				E568A2E1209B7CCF0024DF1D /* invaders.g in CopyFiles */,
+				E568A2E2209B7CCF0024DF1D /* invaders.h in CopyFiles */,
+				E568A2E3209B7CCF0024DF1D /* invaders.f in CopyFiles */,
+				E568A2E4209B7CCF0024DF1D /* invaders.e in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E568A2E5209B7CD40024DF1D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = snd;
+			dstSubfolderSpec = 7;
+			files = (
+				E568A2E6209B7CDE0024DF1D /* 16.wav in CopyFiles */,
+				E568A2E7209B7CDE0024DF1D /* 17.wav in CopyFiles */,
+				E568A2E8209B7CDE0024DF1D /* 15.wav in CopyFiles */,
+				E568A2E9209B7CDE0024DF1D /* 14.wav in CopyFiles */,
+				E568A2EA209B7CDE0024DF1D /* 10.wav in CopyFiles */,
+				E568A2EB209B7CDE0024DF1D /* 11.wav in CopyFiles */,
+				E568A2EC209B7CDE0024DF1D /* 13.wav in CopyFiles */,
+				E568A2ED209B7CDE0024DF1D /* 12.wav in CopyFiles */,
+				E568A2EE209B7CDE0024DF1D /* 9.wav in CopyFiles */,
+				E568A2EF209B7CDE0024DF1D /* 8.wav in CopyFiles */,
+				E568A2F0209B7CDE0024DF1D /* 6.wav in CopyFiles */,
+				E568A2F1209B7CDE0024DF1D /* 7.wav in CopyFiles */,
+				E568A2F2209B7CDE0024DF1D /* 5.wav in CopyFiles */,
+				E568A2F3209B7CDE0024DF1D /* 4.wav in CopyFiles */,
+				E568A2F4209B7CDE0024DF1D /* 0.wav in CopyFiles */,
+				E568A2F5209B7CDE0024DF1D /* 1.wav in CopyFiles */,
+				E568A2F6209B7CDE0024DF1D /* 3.wav in CopyFiles */,
+				E568A2F7209B7CDE0024DF1D /* 2.wav in CopyFiles */,
+				E568A2F8209B7CDE0024DF1D /* 18.wav in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E56EDC2F1FB4B1C80017546D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,23 +96,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E56EDC331FB4B2DE0017546D /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				E56EDC341FB4B2E60017546D /* roms in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E568A1ED209B7B4B0024DF1D /* invaders.g */ = {isa = PBXFileReference; lastKnownFileType = file; path = invaders.g; sourceTree = "<group>"; };
+		E568A1EE209B7B4B0024DF1D /* invaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invaders.h; sourceTree = "<group>"; };
+		E568A1EF209B7B4B0024DF1D /* invaders.f */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.fortran; path = invaders.f; sourceTree = "<group>"; };
+		E568A1F7209B7B4B0024DF1D /* invaders.e */ = {isa = PBXFileReference; lastKnownFileType = file; path = invaders.e; sourceTree = "<group>"; };
+		E568A2BA209B7C520024DF1D /* 16.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 16.wav; sourceTree = "<group>"; };
+		E568A2BB209B7C520024DF1D /* 17.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 17.wav; sourceTree = "<group>"; };
+		E568A2BC209B7C520024DF1D /* 15.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 15.wav; sourceTree = "<group>"; };
+		E568A2BD209B7C520024DF1D /* 14.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 14.wav; sourceTree = "<group>"; };
+		E568A2BE209B7C520024DF1D /* 10.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 10.wav; sourceTree = "<group>"; };
+		E568A2BF209B7C520024DF1D /* 11.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 11.wav; sourceTree = "<group>"; };
+		E568A2C0209B7C520024DF1D /* 13.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 13.wav; sourceTree = "<group>"; };
+		E568A2C1209B7C520024DF1D /* 12.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 12.wav; sourceTree = "<group>"; };
+		E568A2C2209B7C520024DF1D /* 9.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 9.wav; sourceTree = "<group>"; };
+		E568A2C3209B7C520024DF1D /* 8.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 8.wav; sourceTree = "<group>"; };
+		E568A2C4209B7C520024DF1D /* 6.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 6.wav; sourceTree = "<group>"; };
+		E568A2C5209B7C520024DF1D /* 7.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 7.wav; sourceTree = "<group>"; };
+		E568A2C6209B7C520024DF1D /* 5.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 5.wav; sourceTree = "<group>"; };
+		E568A2C7209B7C520024DF1D /* 4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 4.wav; sourceTree = "<group>"; };
+		E568A2C8209B7C520024DF1D /* 0.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 0.wav; sourceTree = "<group>"; };
+		E568A2C9209B7C520024DF1D /* 1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 1.wav; sourceTree = "<group>"; };
+		E568A2CA209B7C520024DF1D /* 3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 3.wav; sourceTree = "<group>"; };
+		E568A2CB209B7C520024DF1D /* 2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 2.wav; sourceTree = "<group>"; };
+		E568A2CC209B7C520024DF1D /* 18.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 18.wav; sourceTree = "<group>"; };
 		E56EDBE91FB4B0690017546D /* Space Invaders.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Invaders.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E56EDBEE1FB4B0690017546D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E56EDBF31FB4B0690017546D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E56EDBF41FB4B0690017546D /* Space_Invaders.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Space_Invaders.entitlements; sourceTree = "<group>"; };
 		E56EDC1B1FB4B1430017546D /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../../../audio.c; sourceTree = "<group>"; };
 		E56EDC1C1FB4B1430017546D /* invaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = invaders.h; path = ../../../invaders.h; sourceTree = "<group>"; };
 		E56EDC1D1FB4B1430017546D /* invaders.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = invaders.c; path = ../../../invaders.c; sourceTree = "<group>"; };
@@ -57,10 +132,8 @@
 		E56EDC1F1FB4B1430017546D /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../../main.c; sourceTree = "<group>"; };
 		E56EDC271FB4B1960017546D /* i8080.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = i8080.c; path = ../../../8080/i8080.c; sourceTree = "<group>"; };
 		E56EDC281FB4B1960017546D /* i8080.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = i8080.h; path = ../../../8080/i8080.h; sourceTree = "<group>"; };
-		E56EDC291FB4B1960017546D /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../../8080/types.h; sourceTree = "<group>"; };
 		E56EDC2B1FB4B1AE0017546D /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
 		E56EDC2D1FB4B1BC0017546D /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = ../../../../../../../../../System/Library/Frameworks/OpenGL.framework; sourceTree = "<group>"; };
-		E56EDC311FB4B2D00017546D /* roms */ = {isa = PBXFileReference; lastKnownFileType = folder; name = roms; path = ../../../roms; sourceTree = "<group>"; };
 		E571B5631FB75F1300B51BAD /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../../../../../../../../../Library/Frameworks/SDL2_mixer.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,6 +151,45 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E568A1E5209B7B4B0024DF1D /* roms */ = {
+			isa = PBXGroup;
+			children = (
+				E568A1ED209B7B4B0024DF1D /* invaders.g */,
+				E568A1EE209B7B4B0024DF1D /* invaders.h */,
+				E568A1EF209B7B4B0024DF1D /* invaders.f */,
+				E568A1F7209B7B4B0024DF1D /* invaders.e */,
+			);
+			name = roms;
+			path = ../../../roms;
+			sourceTree = "<group>";
+		};
+		E568A2B9209B7C520024DF1D /* snd */ = {
+			isa = PBXGroup;
+			children = (
+				E568A2BA209B7C520024DF1D /* 16.wav */,
+				E568A2BB209B7C520024DF1D /* 17.wav */,
+				E568A2BC209B7C520024DF1D /* 15.wav */,
+				E568A2BD209B7C520024DF1D /* 14.wav */,
+				E568A2BE209B7C520024DF1D /* 10.wav */,
+				E568A2BF209B7C520024DF1D /* 11.wav */,
+				E568A2C0209B7C520024DF1D /* 13.wav */,
+				E568A2C1209B7C520024DF1D /* 12.wav */,
+				E568A2C2209B7C520024DF1D /* 9.wav */,
+				E568A2C3209B7C520024DF1D /* 8.wav */,
+				E568A2C4209B7C520024DF1D /* 6.wav */,
+				E568A2C5209B7C520024DF1D /* 7.wav */,
+				E568A2C6209B7C520024DF1D /* 5.wav */,
+				E568A2C7209B7C520024DF1D /* 4.wav */,
+				E568A2C8209B7C520024DF1D /* 0.wav */,
+				E568A2C9209B7C520024DF1D /* 1.wav */,
+				E568A2CA209B7C520024DF1D /* 3.wav */,
+				E568A2CB209B7C520024DF1D /* 2.wav */,
+				E568A2CC209B7C520024DF1D /* 18.wav */,
+			);
+			name = snd;
+			path = ../../../snd;
+			sourceTree = "<group>";
+		};
 		E56EDBE01FB4B0690017546D = {
 			isa = PBXGroup;
 			children = (
@@ -97,14 +209,14 @@
 		E56EDBEB1FB4B0690017546D /* Space Invaders */ = {
 			isa = PBXGroup;
 			children = (
+				E568A2B9209B7C520024DF1D /* snd */,
+				E568A1E5209B7B4B0024DF1D /* roms */,
 				E571B5631FB75F1300B51BAD /* SDL2_mixer.framework */,
-				E56EDC311FB4B2D00017546D /* roms */,
 				E56EDC2D1FB4B1BC0017546D /* OpenGL.framework */,
 				E56EDC2B1FB4B1AE0017546D /* SDL2.framework */,
 				E56EDC071FB4B09B0017546D /* src */,
 				E56EDBEE1FB4B0690017546D /* Assets.xcassets */,
 				E56EDBF31FB4B0690017546D /* Info.plist */,
-				E56EDBF41FB4B0690017546D /* Space_Invaders.entitlements */,
 			);
 			path = "Space Invaders";
 			sourceTree = "<group>";
@@ -114,7 +226,6 @@
 			children = (
 				E56EDC271FB4B1960017546D /* i8080.c */,
 				E56EDC281FB4B1960017546D /* i8080.h */,
-				E56EDC291FB4B1960017546D /* types.h */,
 				E56EDC1B1FB4B1430017546D /* audio.c */,
 				E56EDC1E1FB4B1430017546D /* audio.h */,
 				E56EDC1D1FB4B1430017546D /* invaders.c */,
@@ -135,7 +246,8 @@
 				E56EDBE61FB4B0690017546D /* Frameworks */,
 				E56EDBE71FB4B0690017546D /* Resources */,
 				E56EDC2F1FB4B1C80017546D /* CopyFiles */,
-				E56EDC331FB4B2DE0017546D /* CopyFiles */,
+				E568A2E0209B7CC30024DF1D /* CopyFiles */,
+				E568A2E5209B7CD40024DF1D /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -185,7 +297,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E56EDC321FB4B2D00017546D /* roms in Resources */,
 				E56EDBEF1FB4B0690017546D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -201,6 +312,7 @@
 				E56EDC2A1FB4B1960017546D /* i8080.c in Sources */,
 				E56EDC211FB4B1430017546D /* invaders.c in Sources */,
 				E56EDC221FB4B1430017546D /* main.c in Sources */,
+				E568A25B209B7B4B0024DF1D /* invaders.f in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

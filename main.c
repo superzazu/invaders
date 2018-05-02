@@ -1,54 +1,71 @@
 #include <SDL.h>
-#include <SDL_opengl.h>
 
 #include "invaders.h"
 #include "audio.h"
 
 static const int JOYSTICK_DEAD_ZONE = 8000;
-static invaders si;
+static SDL_Texture* texture = NULL;
+
+static const char *file1 = "roms/invaders.h";
+static const char *file2 = "roms/invaders.g";
+static const char *file3 = "roms/invaders.f";
+static const char *file4 = "roms/invaders.e";
+static const char *file_test1 = "roms/invaders_test_rom/Sitest_716.bin";
+static const char *file_test2 = "roms/test.h";
+
+static void update_screen(invaders* const si) {
+    const uint32_t pitch = sizeof(uint8_t) * 4 * SCREEN_WIDTH;
+    SDL_UpdateTexture(texture, NULL, &si->screen_buffer, pitch);
+}
 
 int main(int argc, char **argv) {
     // SDL init
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
-        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        SDL_Log("unable to initialize SDL: %s", SDL_GetError());
         return 1;
     }
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
     // create SDL window
     SDL_Window* window = SDL_CreateWindow("Space Invaders",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        WIN_WIDTH * 2,
-        WIN_HEIGHT * 2,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        SCREEN_WIDTH * 2,
+        SCREEN_HEIGHT * 2,
+        SDL_WINDOW_RESIZABLE);
 
     if (window == NULL) {
-        SDL_Log("Unable to create window: %s", SDL_GetError());
+        SDL_Log("unable to create window: %s", SDL_GetError());
         return 1;
     }
 
-    // create OpenGL context
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    SDL_SetWindowMinimumSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    if (gl_context == NULL) {
-        SDL_Log("Unable to create OpenGL context: %s", SDL_GetError());
+    // create renderer
+    SDL_Renderer *renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+    if (renderer == NULL) {
+        SDL_Log("unable to create renderer: %s", SDL_GetError());
         return 1;
     }
 
-    // set vsync
-    if (SDL_GL_SetSwapInterval(1) < 0) {
-        SDL_Log("Unable to set vsync: %s", SDL_GetError());
-    }
+    // print info on renderer:
+    SDL_RendererInfo renderer_info;
+    SDL_GetRendererInfo(renderer, &renderer_info);
+    SDL_Log("using renderer %s", renderer_info.name);
 
-    // OpenGL init
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // glMatrixMode(GL_MODELVIEW);
-    // glLoadIdentity();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glViewport(0, 0, WIN_WIDTH * 2, WIN_HEIGHT * 2);
+    // create texture
+    texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGBA32,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT);
+
+    if (texture == NULL) {
+        SDL_Log("unable to create texture: %s", SDL_GetError());
+        return 1;
+    }
 
     // joystick init
     SDL_Joystick *joystick = NULL;
@@ -62,57 +79,31 @@ int main(int argc, char **argv) {
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "opening joystick 0");
         }
     }
+
     // audio init
     audio_init();
 
     // game init
+    invaders si;
     invaders_init(&si);
-    invaders_gpu_init(&si);
+    si.update_screen = update_screen;
+    update_screen(&si);
 
     // loading roms
-    char *base_path = SDL_GetBasePath();
-    char *file1 = "roms/invaders.h";
-    char *file2 = "roms/invaders.g";
-    char *file3 = "roms/invaders.f";
-    char *file4 = "roms/invaders.e";
-    char *file_test1 = "roms/invaders_test_rom/Sitest_716.bin";
-    char *file_test2 = "roms/test.h";
-
-    int BUF_SIZE = strlen(base_path) + strlen(file_test1) + 1;
-    char *full_path = malloc(BUF_SIZE);
-
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file1);
-    if (invaders_load_rom(&si, full_path, 0x0000) != 0) return 1;
-
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file2);
-    if (invaders_load_rom(&si, full_path, 0x0800) != 0) return 1;
-
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file3);
-    if (invaders_load_rom(&si, full_path, 0x1000) != 0) return 1;
-
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file4);
-    if (invaders_load_rom(&si, full_path, 0x1800) != 0) return 1;
-
-    // test rom
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, file_test2);
-    // if (invaders_load_rom(full_path, 0x0000) != 0) return 1;
-
-    free(full_path);
-    free(base_path);
+    if (invaders_load_rom(&si, file1, 0x0000) != 0) return 1;
+    if (invaders_load_rom(&si, file2, 0x0800) != 0) return 1;
+    if (invaders_load_rom(&si, file3, 0x1000) != 0) return 1;
+    if (invaders_load_rom(&si, file4, 0x1800) != 0) return 1;
 
     // main loop
-    bool quit = false;
+    bool should_quit = false;
     SDL_Event e;
     u32 timer = SDL_GetTicks();
 
-    while (!quit) {
+    while (!should_quit) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
-                quit = true;
-            }
-            else if (e.type == SDL_WINDOWEVENT &&
-                     e.window.event == SDL_WINDOWEVENT_RESIZED) {
-                glViewport(0, 0, e.window.data1, e.window.data2);
+                should_quit = true;
             }
             else if (e.type == SDL_KEYDOWN) {
                 const u32 key = e.key.keysym.sym;
@@ -216,7 +207,6 @@ int main(int argc, char **argv) {
                     // to toggle between b&w / color
                     si.colored_screen = !si.colored_screen;
                 }
-                // printf("%d\n", e.jbutton.button);
             }
             else if (e.type == SDL_JOYBUTTONUP) {
                 if (e.jbutton.button == 1) { // B
@@ -250,11 +240,9 @@ int main(int argc, char **argv) {
             invaders_gpu_update(&si);
         }
 
-        // render
-        glClear(GL_COLOR_BUFFER_BIT);
-        invaders_gpu_draw(&si);
-
-        SDL_GL_SwapWindow(window);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
     }
 
     if (joystick) {
@@ -262,9 +250,9 @@ int main(int argc, char **argv) {
     }
 
     audio_quit();
-    SDL_GL_DeleteContext(gl_context);
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    window = NULL;
     SDL_Quit();
 
     return 0;

@@ -2,15 +2,6 @@ BIN = invaders
 CC = cc
 CFLAGS = -g -Wall -Wextra -O3 -std=c11 $(shell pkg-config --cflags sdl2)
 LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_mixer)
-UNAME = $(shell uname -s)
-
-# add OpenGL
-ifeq ($(UNAME), Linux)
-LDFLAGS += -lGL
-endif
-ifeq ($(UNAME), Darwin)
-LDFLAGS += -framework OpenGL
-endif
 
 SOURCES = main.c invaders.c 8080/i8080.c audio.c
 OBJECTS = $(SOURCES:.c=.o)

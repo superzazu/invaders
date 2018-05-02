@@ -1,11 +1,13 @@
 #include "invaders.h"
 
 void invaders_init(invaders* const si) {
-    memset(si->memory, 0, sizeof si->memory);
     i8080_init(&si->cpu);
     si->cpu.read_byte = invaders_rb;
     si->cpu.write_byte = invaders_wb;
     si->cpu.userdata = si;
+
+    memset(si->memory, 0, sizeof si->memory);
+    memset(si->screen_buffer, 0, sizeof si->screen_buffer);
     si->next_interrupt = 0x08;
     si->port1 = 1 << 3; // bit 3 is always set
     si->port2 = 0;
@@ -15,38 +17,23 @@ void invaders_init(invaders* const si) {
     si->last_out_port3 = 0;
     si->last_out_port5 = 0;
     si->colored_screen = true;
+    si->update_screen = NULL;
 
     // load sounds
-    char* base_path = SDL_GetBasePath();
-    const int BUF_SIZE = strlen(base_path) + strlen("roms/snd/XX.wav") + 1;
-    char* full_path = malloc(BUF_SIZE);
-
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/8.wav");
-    si->sounds[0] = audio_load_snd(full_path); // ufo sound
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/1.wav");
-    si->sounds[1] = audio_load_snd(full_path); // shoot sound
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/2.wav");
-    si->sounds[2] = audio_load_snd(full_path); // player die
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/3.wav");
-    si->sounds[3] = audio_load_snd(full_path); // alien die
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/4.wav");
-    si->sounds[4] = audio_load_snd(full_path); // alien move 1
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/5.wav");
-    si->sounds[5] = audio_load_snd(full_path); // alien move 2
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/6.wav");
-    si->sounds[6] = audio_load_snd(full_path); // alien move 3
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/7.wav");
-    si->sounds[7] = audio_load_snd(full_path); // alien move 4
-    snprintf(full_path, BUF_SIZE, "%s%s", base_path, "roms/snd/10.wav");
-    si->sounds[8] = audio_load_snd(full_path); // ufo hit
-
-    free(full_path);
-    free(base_path);
+    si->sounds[0] = audio_load_snd("snd/8.wav"); // ufo sound
+    si->sounds[1] = audio_load_snd("snd/1.wav"); // shoot sound
+    si->sounds[2] = audio_load_snd("snd/2.wav"); // player die
+    si->sounds[3] = audio_load_snd("snd/3.wav"); // alien die
+    si->sounds[4] = audio_load_snd("snd/4.wav"); // alien move 1
+    si->sounds[5] = audio_load_snd("snd/5.wav"); // alien move 2
+    si->sounds[6] = audio_load_snd("snd/6.wav"); // alien move 3
+    si->sounds[7] = audio_load_snd("snd/7.wav"); // alien move 4
+    si->sounds[8] = audio_load_snd("snd/10.wav"); // ufo hit
 }
 
+// emulates the correct number of cycles for one frame; this function should
+// be called every 1/60s
 void invaders_update(invaders* const si) {
-    // emulates the correct number of cycles for one frame
-    // function to execute every 1/60s
     u32 count_cycles = 0;
 
     while (count_cycles <= CYCLES_PER_FRAME) {
@@ -105,7 +92,7 @@ void invaders_update(invaders* const si) {
         }
 
         // interrupts handling: every HALF_CYCLES_PER_FRAME cycles, an
-        // interrupt is generated (0x08 and 0x10) if the iff == 1
+        // interrupt is requested (0x08 or 0x10)
         if (si->cpu.cyc >= HALF_CYCLES_PER_FRAME) {
             i8080_interrupt(&si->cpu, si->next_interrupt);
             si->cpu.cyc -= HALF_CYCLES_PER_FRAME;
@@ -114,80 +101,89 @@ void invaders_update(invaders* const si) {
     }
 }
 
-void invaders_gpu_init(invaders* const si) {
-    // initialising the screen buffer with zeroes
-    for (int x = 0; x < 256; x++) {
-        for (int y = 0; y < 224; y++) {
-            si->screen_buffer[y][x][0] = 0;
-            si->screen_buffer[y][x][1] = 0;
-            si->screen_buffer[y][x][2] = 0;
-        }
-    }
-
-    // creating the texture
-    glGenTextures(1, &si->texture);
-    glBindTexture(GL_TEXTURE_2D, si->texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 224, 0,
-                 GL_RGB, GL_FLOAT, &si->screen_buffer);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glEnable(GL_TEXTURE_2D);
-}
-
+// updates the screen buffer according to what is in the video ram
 void invaders_gpu_update(invaders* const si) {
-    const int start_addr = 0x2400;
+    // the screen is 256 * 224 pixels, and is rotated anti-clockwise.
+    // these are the overlay dimensions:
+    // ,_______________________________.
+    // |WHITE            ^             |
+    // |                32             |
+    // |                 v             |
+    // |-------------------------------|
+    // |RED              ^             |
+    // |                32             |
+    // |                 v             |
+    // |-------------------------------|
+    // |WHITE                          |
+    // |         < 224 >               |
+    // |                               |
+    // |                 ^             |
+    // |                120            |
+    // |                 v             |
+    // |                               |
+    // |                               |
+    // |                               |
+    // |-------------------------------|
+    // |GREEN                          |
+    // | ^                  ^          |
+    // |56        ^        56          |
+    // | v       72         v          |
+    // |____      v      ______________|
+    // |  ^  |          | ^            |
+    // |<16> |  < 118 > |16   < 122 >  |
+    // |  v  |          | v            |
+    // |WHITE|          |         WHITE|
+    // `-------------------------------'
 
     // the screen is 256 * 224 pixels, and 1 byte contains 8 pixels
     for (int i = 0; i < 256 * 224 / 8; i++) {
         const int y = i * 8 / 256;
         const int base_x = (i * 8) % 256;
-        const u8 cur_byte = si->memory[start_addr + i];
+        const u8 cur_byte = si->memory[VRAM_ADDR + i];
 
         for (u8 bit = 0; bit < 8; bit++) {
-            const int px = base_x + bit;
-            const int py = y;
+            int px = base_x + bit;
+            int py = y;
             const bool is_pixel_lit = (cur_byte >> bit) & 1;
-            float r = 0, g = 0, b = 0;
+            u8 r = 0, g = 0, b = 0;
 
+            // colour handling:
             if (!si->colored_screen && is_pixel_lit) {
-                r = 1; g = 1; b = 1;
+                r = 255; g = 255; b = 255;
             }
             else if (si->colored_screen && is_pixel_lit) {
                 if (px < 16) {
                     if (py < 16 || py > 118 + 16) {
-                        r = 1; g = 1; b = 1;
+                        r = 255; g = 255; b = 255;
                     }
                     else {
-                        g = 1;
+                        g = 255;
                     }
                 }
                 else if (px >= 16 && px <= 16 + 56) {
-                    g = 1;
+                    g = 255;
                 }
                 else if (px >= 16 + 56 + 120 && px < 16 + 56 + 120 + 32) {
-                    r = 1;
+                    r = 255;
                 }
                 else {
-                    r = 1; g = 1; b = 1;
+                    r = 255; g = 255; b = 255;
                 }
             }
+
+            // space invaders' screen is rotated 90 degrees anti-clockwise
+            // so we invert the coordinates:
+            const int temp_x = px;
+            px = py;
+            py = -temp_x + SCREEN_HEIGHT - 1;
 
             si->screen_buffer[py][px][0] = r;
             si->screen_buffer[py][px][1] = g;
             si->screen_buffer[py][px][2] = b;
         }
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 224, 0,
-                 GL_RGB, GL_FLOAT, &si->screen_buffer);
-}
 
-void invaders_gpu_draw(invaders* const si) {
-    glBegin(GL_QUADS);
-    glTexCoord2f(1, 0); glVertex2f(-1, 1);
-    glTexCoord2f(0, 0); glVertex2f(-1, -1);
-    glTexCoord2f(0, 1); glVertex2f(1, -1);
-    glTexCoord2f(1, 1); glVertex2f(1, 1);
-    glEnd();
+    si->update_screen(si);
 }
 
 void invaders_play_sound(invaders* const si, const u8 bank) {
@@ -236,51 +232,38 @@ void invaders_play_sound(invaders* const si, const u8 bank) {
 }
 
 // memory handling
+
+// reads a byte from memory
 u8 invaders_rb(void* userdata, const u16 addr) {
     invaders* const si = (invaders*) userdata;
     return si->memory[addr];
 }
 
+// writes a byte to memory
 void invaders_wb(void* userdata, const u16 addr, const u8 val) {
     invaders* const si = (invaders*) userdata;
     si->memory[addr] = val;
 }
 
+// loads up a rom file at a specific address in memory (start_addr)
 int invaders_load_rom(invaders* const si, const char* filename,
                       const u16 start_addr) {
-    FILE *f;
-    size_t file_size = 0;
-
-    f = fopen (filename, "rb");
+    SDL_RWops *f = SDL_RWFromFile(filename, "rb");
     if (f == NULL) {
-        fprintf(stderr, "error: can't open ROM file '%s'\n", filename);
+        fprintf(stderr, "error: can't open rom file '%s'\n", filename);
         return 1;
     }
 
-    // obtain file size
-    fseek(f, 0, SEEK_END);
-    file_size = ftell(f);
-    rewind(f);
+    Sint64 file_size = SDL_RWsize(f);
 
-    if (file_size > 0xFFFF) {
+    if (file_size > 0x800) {
         fprintf(stderr, "error: rom file '%s' too big to fit in memory\n",
                 filename);
         return 1;
     }
 
-    // copy file data to buffer
-    u8 buffer[file_size];
-    size_t result = fread(buffer, 1, file_size, f);
-    if (result != file_size) {
-        fprintf(stderr, "error: while reading ROM file '%s'\n", filename);
-        return 1;
-    }
+    SDL_RWread(f, &si->memory[start_addr], 1, file_size);
 
-    // copy buffer to memory
-    for (size_t i = 0; i < file_size; i++) {
-        si->memory[start_addr + i] = buffer[i];
-    }
-
-    fclose(f);
+    SDL_RWclose(f);
     return 0;
 }
