@@ -17,4 +17,4 @@ $(BIN): $(OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(BIN) *.o
+	rm -f $(BIN) *.o 8080/*.o
