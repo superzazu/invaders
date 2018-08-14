@@ -13,8 +13,8 @@
 
 #define MAX_SOUNDS 256
 
-void audio_init();
-void audio_quit();
+void audio_init(void);
+void audio_quit(void);
 
 int audio_load_snd(const char* filename);
 int audio_play_snd(const int id);

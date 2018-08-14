@@ -3,7 +3,7 @@
 static Mix_Chunk *sounds[MAX_SOUNDS] = {NULL};
 
 // initializes SDL_mixer
-void audio_init() {
+void audio_init(void) {
     const int chunk_size = 4096;
     const int channels = 2;
 
@@ -19,7 +19,7 @@ void audio_init() {
 }
 
 // frees buffered sounds and quits SDL_mixer
-void audio_quit() {
+void audio_quit(void) {
     for (int i = 0; i < MAX_SOUNDS; i++) {
         if (sounds[i] != NULL) {
             audio_free_snd(i);
