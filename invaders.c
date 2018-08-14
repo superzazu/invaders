@@ -20,15 +20,15 @@ void invaders_init(invaders* const si) {
     si->update_screen = NULL;
 
     // load sounds
-    si->sounds[0] = audio_load_snd("snd/8.wav"); // ufo sound
-    si->sounds[1] = audio_load_snd("snd/1.wav"); // shoot sound
-    si->sounds[2] = audio_load_snd("snd/2.wav"); // player die
-    si->sounds[3] = audio_load_snd("snd/3.wav"); // alien die
-    si->sounds[4] = audio_load_snd("snd/4.wav"); // alien move 1
-    si->sounds[5] = audio_load_snd("snd/5.wav"); // alien move 2
-    si->sounds[6] = audio_load_snd("snd/6.wav"); // alien move 3
-    si->sounds[7] = audio_load_snd("snd/7.wav"); // alien move 4
-    si->sounds[8] = audio_load_snd("snd/10.wav"); // ufo hit
+    si->sounds[0] = audio_load_snd("res/snd/8.wav"); // ufo sound
+    si->sounds[1] = audio_load_snd("res/snd/1.wav"); // shoot sound
+    si->sounds[2] = audio_load_snd("res/snd/2.wav"); // player die
+    si->sounds[3] = audio_load_snd("res/snd/3.wav"); // alien die
+    si->sounds[4] = audio_load_snd("res/snd/4.wav"); // alien move 1
+    si->sounds[5] = audio_load_snd("res/snd/5.wav"); // alien move 2
+    si->sounds[6] = audio_load_snd("res/snd/6.wav"); // alien move 3
+    si->sounds[7] = audio_load_snd("res/snd/7.wav"); // alien move 4
+    si->sounds[8] = audio_load_snd("res/snd/10.wav"); // ufo hit
 }
 
 // emulates the correct number of cycles for one frame; this function should
@@ -250,15 +250,29 @@ int invaders_load_rom(invaders* const si, const char* filename,
                       const u16 start_addr) {
     SDL_RWops *f = SDL_RWFromFile(filename, "rb");
     if (f == NULL) {
-        fprintf(stderr, "error: can't open rom file '%s'\n", filename);
+        SDL_LogCritical(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "can't open rom file %s",
+            filename);
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_ERROR,
+            "Invaders error",
+            "can't open rom file", NULL);
         return 1;
     }
 
     Sint64 file_size = SDL_RWsize(f);
 
     if (file_size > 0x800) {
-        fprintf(stderr, "error: rom file '%s' too big to fit in memory\n",
-                filename);
+        SDL_LogCritical(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "rom file '%s' is too big to fit in memory",
+            filename);
+        SDL_ShowSimpleMessageBox(
+            SDL_MESSAGEBOX_ERROR,
+            "Invaders error",
+            "rom file is too big to fit in memory",
+            NULL);
         return 1;
     }
 

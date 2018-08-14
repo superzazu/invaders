@@ -1,5 +1,8 @@
 .DS_Store
 *.o
 invaders
-roms
-snd
+res
+invaders.js
+invaders.wasm
+invaders.data
+invaders.html

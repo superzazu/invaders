@@ -11,13 +11,16 @@ Features:
 - [x] colourised screen (can also play in black & white)
 - [x] two-players mode
 - [x] joystick support
+- [x] web export to HTML5 using emscripten
 
-## How to run it
+## How to build it
 
 You should be able to launch it by running `make && ./invaders`. It has been tested on macOS 10.13 with clang and debian 8 with gcc 5.
-You'll need to have the files `invaders.e`, `invaders.f`, `invaders.g` and `invaders.h` in the `roms` folder. You can also drop the Space Invaders wav files in `snd` if you have them.
+You'll need to have the files `invaders.e`, `invaders.f`, `invaders.g` and `invaders.h` in `res/roms`. You can also drop the Space Invaders wav files in `res/snd` if you have them.
 
-To build the .app bundle for macOS, you need to have [SDL2.framework](http://libsdl.org/release/SDL2-2.0.8.dmg) and [SDL2_mixer.framework](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.2.dmg) file in `/Library/Frameworks` folder. Then you can open the .xcodeproj file and build the project.
+To build the .app bundle for macOS, you need to have [SDL2.framework](http://libsdl.org/download-2.0.php) and [SDL2_mixer.framework](https://www.libsdl.org/projects/SDL_mixer/) file in `/Library/Frameworks` folder. Then you can open the .xcodeproj file and build the project.
+
+You can also build it for the web if you have emscripten installed (for macOS, install with `brew install emscripten`). Just run `make web` to obtain four files invaders.(js|wasm|data|html) which can be hosted on a web server.
 
 ## How to play
 
