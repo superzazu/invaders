@@ -172,7 +172,7 @@ void mainloop(void) {
     }
 
     // update the game for each frame (every 1/60 seconds)
-    if (SDL_GetTicks() - timer > (1 / FPS) * 1000) {
+    if (SDL_GetTicks() - timer > (1.f / FPS) * 1000) {
         timer = SDL_GetTicks();
         invaders_update(&si);
         invaders_gpu_update(&si);
