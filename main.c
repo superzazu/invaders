@@ -36,35 +36,35 @@ void mainloop(void) {
             #endif
         }
         else if (e.type == SDL_KEYDOWN) {
-            const u32 key = e.key.keysym.sym;
-            if (key == SDLK_c) {
+            const u32 key = e.key.keysym.scancode;
+            if (key == SDL_SCANCODE_C) {
                 si.port1 |= 1 << 0; // coin
             }
-            else if (key == SDLK_2) {
+            else if (key == SDL_SCANCODE_2) {
                 si.port1 |= 1 << 1; // P2 start button
             }
-            else if (key == SDLK_RETURN) {
+            else if (key == SDL_SCANCODE_RETURN) {
                 si.port1 |= 1 << 2; // P1 start button
             }
-            else if (key == SDLK_SPACE) {
+            else if (key == SDL_SCANCODE_SPACE) {
                 si.port1 |= 1 << 4; // P1 shoot button
                 si.port2 |= 1 << 4; // P2 shoot button
             }
-            else if (key == SDLK_LEFT) {
+            else if (key == SDL_SCANCODE_LEFT) {
                 si.port1 |= 1 << 5; // P1 joystick left
                 si.port2 |= 1 << 5; // P2 joystick left
             }
-            else if (key == SDLK_RIGHT) {
+            else if (key == SDL_SCANCODE_RIGHT) {
                 si.port1 |= 1 << 6; // P1 joystick right
                 si.port2 |= 1 << 6; // P2 joystick right
             }
-            else if (key == SDLK_t) {
+            else if (key == SDL_SCANCODE_T) {
                 si.port2 |= 1 << 2; // tilt
             }
-            else if (key == SDLK_F9) { // to toggle between b&w / color
+            else if (key == SDL_SCANCODE_F9) { // to toggle between b&w / color
                 si.colored_screen = !si.colored_screen;
             }
-            else if (key == SDLK_ESCAPE) {
+            else if (key == SDL_SCANCODE_ESCAPE) {
                 // allow web users to kill game with esc key
                 #ifdef __EMSCRIPTEN__
                 SDL_Event quit_event;
@@ -74,29 +74,29 @@ void mainloop(void) {
             }
         }
         else if (e.type == SDL_KEYUP) {
-            const u32 key = e.key.keysym.sym;
-            if (key == SDLK_c) {
+            const u32 key = e.key.keysym.scancode;
+            if (key == SDL_SCANCODE_C) {
                 si.port1 &= 0b11111110; // coin
             }
-            else if (key == SDLK_2) {
+            else if (key == SDL_SCANCODE_2) {
                 si.port1 &= 0b11111101; // P2 start button
             }
-            else if (key == SDLK_RETURN) {
+            else if (key == SDL_SCANCODE_RETURN) {
                 si.port1 &= 0b11111011; // P1 start button
             }
-            else if (key == SDLK_SPACE) {
+            else if (key == SDL_SCANCODE_SPACE) {
                 si.port1 &= 0b11101111; // P1 shoot button
                 si.port2 &= 0b11101111; // P2 shoot button
             }
-            else if (key == SDLK_LEFT) {
+            else if (key == SDL_SCANCODE_LEFT) {
                 si.port1 &= 0b11011111; // P1 joystick left
                 si.port2 &= 0b11011111; // P2 joystick left
             }
-            else if (key == SDLK_RIGHT) {
+            else if (key == SDL_SCANCODE_RIGHT) {
                 si.port1 &= 0b10111111; // P1 joystick right
                 si.port2 &= 0b10111111; // P2 joystick right
             }
-            else if (key == SDLK_t) {
+            else if (key == SDL_SCANCODE_T) {
                 si.port2 &= 0b11111011; // tilt
             }
         }
