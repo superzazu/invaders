@@ -206,6 +206,10 @@ int main(int argc, char **argv) {
     SDL_SetWindowMinimumSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);
     SDL_ShowCursor(SDL_DISABLE);
 
+    // on macOS, use metal driver if available:
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+
     // create renderer
     renderer = SDL_CreateRenderer(
         window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
