@@ -41,12 +41,12 @@ struct invaders {
 void invaders_init(invaders* const si);
 void invaders_update(invaders* const si);
 void invaders_gpu_update(invaders* const si);
-void invaders_play_sound(invaders* const si, const u8 bank);
+void invaders_play_sound(invaders* const si, u8 bank);
 
 // memory handling
-u8 invaders_rb(void* userdata, const u16 addr);
-void invaders_wb(void* userdata, const u16 addr, const u8 val);
+u8 invaders_rb(void* userdata, u16 addr);
+void invaders_wb(void* userdata, u16 addr, u8 val);
 int invaders_load_rom(invaders* const si, const char* filename,
-                      const u16 start_addr);
+                      u16 start_addr);
 
 #endif  // SPACEI_INVADERS_H

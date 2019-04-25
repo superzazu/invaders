@@ -190,9 +190,9 @@ void invaders_gpu_update(invaders* const si) {
     si->update_screen(si);
 }
 
-void invaders_play_sound(invaders* const si, const u8 bank) {
+void invaders_play_sound(invaders* const si, u8 bank) {
     // plays a sound if the corresponding bit have changed from 0 to 1
-    const u8 data = si->cpu.a;
+    u8 data = si->cpu.a;
 
     if (bank == 1) {
         if (data != si->last_out_port3) {
@@ -238,7 +238,7 @@ void invaders_play_sound(invaders* const si, const u8 bank) {
 // memory handling
 
 // reads a byte from memory
-u8 invaders_rb(void* userdata, const u16 addr) {
+u8 invaders_rb(void* userdata, u16 addr) {
     invaders* const si = (invaders*) userdata;
 
     // if (addr >= 0x6000) return 0;
@@ -248,7 +248,7 @@ u8 invaders_rb(void* userdata, const u16 addr) {
 }
 
 // writes a byte to memory
-void invaders_wb(void* userdata, const u16 addr, const u8 val) {
+void invaders_wb(void* userdata, u16 addr, u8 val) {
     invaders* const si = (invaders*) userdata;
 
     if (addr < 0x2000) return; // cannot write to rom
@@ -260,7 +260,7 @@ void invaders_wb(void* userdata, const u16 addr, const u8 val) {
 
 // loads up a rom file at a specific address in memory (start_addr)
 int invaders_load_rom(invaders* const si, const char* filename,
-                      const u16 start_addr) {
+                      u16 start_addr) {
     SDL_RWops *f = SDL_RWFromFile(filename, "rb");
     if (f == NULL) {
         SDL_LogCritical(
