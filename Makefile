@@ -1,27 +1,26 @@
-BIN = invaders
-CC = cc
-ifeq ($(MAKECMDGOALS),web)
-CC = emcc
-endif
-CFLAGS = -g -Wall -Wextra -O3 -std=c11 $(shell pkg-config --cflags sdl2)
+bin = invaders
+src = $(wildcard *.c) 8080/i8080.c
+obj = $(src:.c=.o)
+
+CFLAGS = -g -Wall -Wextra -O2 -std=c99 -pedantic $(shell pkg-config --cflags sdl2)
 LDFLAGS = $(shell pkg-config --libs sdl2 SDL2_mixer)
 
-SOURCES = main.c invaders.c 8080/i8080.c audio.c
-OBJECTS = $(SOURCES:.c=.o)
+ifeq ($(MAKECMDGOALS),web)
+CC = emcc
+CFLAGS = -g -Wall -Wextra -O2 -std=c99 -pedantic -s USE_SDL=2 -s USE_SDL_MIXER=2
+LDFLAGS = -s USE_SDL=2 -s USE_SDL_MIXER=2 --preload-file res
+endif
 
-.PHONY: clean
+.PHONY: all clean
 
-default: $(BIN)
+all: $(bin)
 
-$(BIN): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(BIN) $(OBJECTS) $(LDFLAGS)
+$(bin): $(obj)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-.c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+web: $(obj)
+	$(CC) $^ $(LDFLAGS) -o invaders.html
 
 clean:
-	rm -f $(BIN) *.o 8080/*.o
-	rm -f invaders.js invaders.wasm invaders.data invaders.html
-
-web: $(OBJECTS)
-	$(CC) $(OBJECTS) -s USE_SDL=2 --preload-file res -o invaders.html
+	-rm $(bin) $(obj)
+	-rm invaders.js invaders.wasm invaders.data invaders.html
