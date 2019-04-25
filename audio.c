@@ -1,21 +1,22 @@
 #include "audio.h"
 
-static Mix_Chunk *sounds[MAX_SOUNDS] = {NULL};
+static Mix_Chunk* sounds[MAX_SOUNDS] = {NULL};
 
 // initializes SDL_mixer
-void audio_init(void) {
-    const int chunk_size = 4096;
-    const int channels = 2;
+int audio_init(void) {
+    const int chunk_size = 1024;
 
     int result = Mix_OpenAudio(
         MIX_DEFAULT_FREQUENCY,
         MIX_DEFAULT_FORMAT,
-        channels,
+        MIX_DEFAULT_CHANNELS,
         chunk_size);
 
     if (result != 0) {
         SDL_Log("unable to initialize SDL_mixer: %s", Mix_GetError());
     }
+
+    return result;
 }
 
 // frees buffered sounds and quits SDL_mixer
@@ -47,15 +48,23 @@ int audio_load_snd(const char* filename) {
 }
 
 // plays a WAV file
-int audio_play_snd(const int id) {
+int audio_play_snd(int id) {
     if (id < 0 || id >= MAX_SOUNDS) {
         return 1;
     }
     return Mix_PlayChannel(-1, sounds[id], 0);
 }
 
+// sets the volume for a WAV file (between 0 and 128)
+int audio_volume_snd(int id, int vol) {
+    if (id < 0 || id >= MAX_SOUNDS) {
+        return 1;
+    }
+    return Mix_VolumeChunk(sounds[id], vol);
+}
+
 // frees a WAV file from memory
-void audio_free_snd(const int id) {
+void audio_free_snd(int id) {
     if (sounds[id] != NULL) {
         Mix_FreeChunk(sounds[id]);
         sounds[id] = NULL;
