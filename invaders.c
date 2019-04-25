@@ -29,6 +29,10 @@ void invaders_init(invaders* const si) {
     si->sounds[6] = audio_load_snd("res/snd/6.wav"); // alien move 3
     si->sounds[7] = audio_load_snd("res/snd/7.wav"); // alien move 4
     si->sounds[8] = audio_load_snd("res/snd/10.wav"); // ufo hit
+
+    for (int i = 0; i <= 8; i++) {
+        audio_volume_snd(si->sounds[i], MIX_MAX_VOLUME / 4);
+    }
 }
 
 // emulates the correct number of cycles for one frame; this function should
@@ -236,12 +240,21 @@ void invaders_play_sound(invaders* const si, const u8 bank) {
 // reads a byte from memory
 u8 invaders_rb(void* userdata, const u16 addr) {
     invaders* const si = (invaders*) userdata;
+
+    // if (addr >= 0x6000) return 0;
+    if (addr >= 0x4000 && addr < 0x6000) addr -= 0x2000; // RAM mirror
+
     return si->memory[addr];
 }
 
 // writes a byte to memory
 void invaders_wb(void* userdata, const u16 addr, const u8 val) {
     invaders* const si = (invaders*) userdata;
+
+    if (addr < 0x2000) return; // cannot write to rom
+    // if (addr >= 0x6000) return;
+    if (addr >= 0x4000 && addr < 0x6000) addr -= 0x2000; // RAM mirror
+
     si->memory[addr] = val;
 }
 
