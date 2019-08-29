@@ -1,21 +1,136 @@
 #include "invaders.h"
 
+// reads a byte from memory
+static u8 invaders_rb(void* userdata, u16 addr) {
+    invaders* const si = (invaders*) userdata;
+
+    if (addr >= 0x6000) return 0;
+    if (addr >= 0x4000 && addr < 0x6000) addr -= 0x2000; // RAM mirror
+
+    return si->memory[addr];
+}
+
+// writes a byte to memory
+static void invaders_wb(void* userdata, u16 addr, u8 val) {
+    invaders* const si = (invaders*) userdata;
+
+    // the game can only write to 0x2000-0x4000
+    if (addr >= 0x2000 && addr < 0x4000) {
+        si->memory[addr] = val;
+    }
+}
+
+// port in (read)
+static u8 port_in(void* userdata, u8 port) {
+    invaders* const si = (invaders*) userdata;
+    u8 value = 0xFF;
+
+    // see https://computerarcheology.com/Arcade/SpaceInvaders/Hardware.html
+    switch (port) {
+    case 0: // 0000pr: INP0 (note: apparently never used by code)
+        break;
+
+    case 1: // 0001pr: INP1
+        value = si->port1;
+        break;
+
+    case 2: // 0002pr: INP2
+        value = si->port2;
+        break;
+
+    case 3: { // 0003pr: SHFT_IN
+        // reading from port 3 returns the shift result:
+        const u16 shift = (si->shift_msb << 8) | si->shift_lsb;
+        value = (shift >> (8 - si->shift_offset)) & 0xFF;
+        } break;
+
+    default:
+        fprintf(stderr, "error: unknown IN port %02x\n", port);
+        break;
+    }
+
+    return value;
+}
+
+// port out (write)
+static void port_out(void* userdata, u8 port, u8 value) {
+    invaders* const si = (invaders*) userdata;
+
+    // see https://computerarcheology.com/Arcade/SpaceInvaders/Hardware.html
+    switch (port) {
+    case 2: // 0002pw: SHFTAMNT
+        // sets the shift offset for the 8 bit result
+        si->shift_offset = value & 0b111;
+        break;
+
+    case 3: // 0003pw: SOUND1
+        // plays a sound from bank 1
+        invaders_play_sound(si, 1);
+        break;
+
+    case 4: // 0004pw: SHFT_DATA
+        // writing to port 4 shifts MSB into LSB, and the new value into MSB:
+        si->shift_lsb = si->shift_msb;
+        si->shift_msb = value;
+        break;
+
+    case 5: // 0005pw: SOUND2
+        // plays a sound from bank 2
+        invaders_play_sound(si, 2);
+        break;
+
+    case 6: // 0006pw: WATCHDOG
+        break;
+
+    default:
+        fprintf(stderr, "error: unknown OUT port %02x\n", port);
+        break;
+    }
+}
+
 void invaders_init(invaders* const si) {
     i8080_init(&si->cpu);
+    si->cpu.userdata = si;
     si->cpu.read_byte = invaders_rb;
     si->cpu.write_byte = invaders_wb;
-    si->cpu.userdata = si;
+    si->cpu.port_in = port_in;
+    si->cpu.port_out = port_out;
 
     memset(si->memory, 0, sizeof si->memory);
     memset(si->screen_buffer, 0, sizeof si->screen_buffer);
-    si->next_interrupt = 0x08;
-    si->port1 = 1 << 3; // bit 3 is always set
-    si->port2 = 0;
-    si->shift0 = 0;
-    si->shift1 = 0;
+    si->next_interrupt = 0xcf;
+
+    // PORT 1:
+    // Bit Description
+    // 0   Coin slot (1 = coin inserted)
+    // 1   Two players button
+    // 2   One player button
+    // 3   n/a
+    // 4   Player one - Fire button
+    // 5   Player one - Left button
+    // 6   Player one - Right button
+    // 7   n/a
+    si->port1 = 0b00000000;
+
+    // PORT 2:
+    // Bit Description
+    // 0-1 DIP switch: number of ships (00 = 3 ships, 10 = 5 ships,
+    //                                  01 = 4 ships, 11 = 6 ships)
+    // 2   TILT
+    // 3   n/a
+    // 4   Player two - Fire button
+    // 5   Player two - Left button
+    // 6   Player two - Right button
+    // 7   ???
+    si->port2 = 0b00000000;
+
+    si->shift_msb = 0;
+    si->shift_lsb = 0;
     si->shift_offset = 0;
+
     si->last_out_port3 = 0;
     si->last_out_port5 = 0;
+
     si->colored_screen = true;
     si->update_screen = NULL;
 
@@ -35,72 +150,33 @@ void invaders_init(invaders* const si) {
     }
 }
 
-// emulates the correct number of cycles for one frame; this function should
-// be called every 1/60s
-void invaders_update(invaders* const si) {
-    u32 count_cycles = 0;
-
-    while (count_cycles <= CYCLES_PER_FRAME) {
-        const u32 start_cyc = si->cpu.cyc;
-        const u8 opcode = invaders_rb(si, si->cpu.pc);
-
+// advances emulation for `ms` milliseconds.
+void invaders_update(invaders* const si, int ms) {
+    // machine executes exactly CLOCK_SPEED cycles every second, so we need
+    // to execute "ms * CLOCK_SPEED / 1000"
+    int count = 0;
+    while (count < ms * CLOCK_SPEED / 1000) {
+        int cyc = si->cpu.cyc;
         i8080_step(&si->cpu);
+        int elapsed = si->cpu.cyc - cyc;
+        count += elapsed;
 
-        count_cycles += si->cpu.cyc - start_cyc;
+        // interrupt handling: two interrupts are requested:
+        // - 0xcf (RST 8) when the beam is *near* the middle of the screen
+        // - 0xd7 (RST 10) when the beam is at the end of the screen (line 224)
+        //
+        // For now, we just request one interrupt after one mid-frame, so
+        // after "CYCLES_PER_FRAME / 2" cycles
+        if (si->cpu.cyc >= CYCLES_PER_FRAME / 2) {
+            si->cpu.cyc -= CYCLES_PER_FRAME / 2;
 
-        // Space Invaders special opcodes (IN/OUT)
-        switch (opcode) {
-        case 0xDB: { // IN
-            const u8 port = invaders_rb(si, si->cpu.pc++);
-            u8 value = 0;
-
-            if (port == 1) {
-                value = si->port1;
-            }
-            else if (port == 2) {
-                value = si->port2;
-            }
-            else if (port == 3) {
-                const u16 v = (si->shift1 << 8) | si->shift0;
-                value = (v >> (8 - si->shift_offset)) & 0xFF;
-            }
-            else {
-                fprintf(stderr, "error: unknown IN port %02X\n", port);
-            }
-            si->cpu.a = value;
-        } break;
-        case 0xD3: { // OUT
-            const u8 port = invaders_rb(si, si->cpu.pc++);
-            const u8 value = si->cpu.a;
-
-            if (port == 2) {
-                si->shift_offset = value & 0x7;
-            }
-            else if (port == 3) {
-                invaders_play_sound(si, 1);
-            }
-            else if (port == 4) {
-                si->shift0 = si->shift1;
-                si->shift1 = value;
-            }
-            else if (port == 5) {
-                invaders_play_sound(si, 2);
-            }
-            else if (port == 6) {
-                // debug port?
-            }
-            else {
-                fprintf(stderr, "error: unknown OUT port %02X\n", port);
-            }
-        } break;
-        }
-
-        // interrupts handling: every HALF_CYCLES_PER_FRAME cycles, an
-        // interrupt is requested (0x08 or 0x10)
-        if (si->cpu.cyc >= HALF_CYCLES_PER_FRAME) {
             i8080_interrupt(&si->cpu, si->next_interrupt);
-            si->cpu.cyc -= HALF_CYCLES_PER_FRAME;
-            si->next_interrupt = si->next_interrupt == 0x08 ? 0x10 : 0x08;
+            if (si->next_interrupt == 0xd7) {
+                // we update the screen at the start of vblank,
+                // which coincides with the request of RST 10 interrupt
+                invaders_gpu_update(si);
+            }
+            si->next_interrupt = si->next_interrupt == 0xcf ? 0xd7 : 0xcf;
         }
     }
 }
@@ -235,33 +311,10 @@ void invaders_play_sound(invaders* const si, u8 bank) {
     }
 }
 
-// memory handling
-
-// reads a byte from memory
-u8 invaders_rb(void* userdata, u16 addr) {
-    invaders* const si = (invaders*) userdata;
-
-    // if (addr >= 0x6000) return 0;
-    if (addr >= 0x4000 && addr < 0x6000) addr -= 0x2000; // RAM mirror
-
-    return si->memory[addr];
-}
-
-// writes a byte to memory
-void invaders_wb(void* userdata, u16 addr, u8 val) {
-    invaders* const si = (invaders*) userdata;
-
-    if (addr < 0x2000) return; // cannot write to rom
-    // if (addr >= 0x6000) return;
-    if (addr >= 0x4000 && addr < 0x6000) addr -= 0x2000; // RAM mirror
-
-    si->memory[addr] = val;
-}
-
 // loads up a rom file at a specific address in memory (start_addr)
 int invaders_load_rom(invaders* const si, const char* filename,
                       u16 start_addr) {
-    SDL_RWops *f = SDL_RWFromFile(filename, "rb");
+    SDL_RWops* f = SDL_RWFromFile(filename, "rb");
     if (f == NULL) {
         SDL_LogCritical(
             SDL_LOG_CATEGORY_APPLICATION,

@@ -15,19 +15,34 @@
 #define FILE_TEST1 "res/roms/invaders_test_rom/Sitest_716.bin"
 #define FILE_TEST2 "res/roms/test.h"
 
-static bool should_quit = false;
-static SDL_Event e;
-static u32 timer = 0;
-static invaders si;
-static SDL_Renderer* renderer;
+static SDL_Renderer* renderer = NULL;
 static SDL_Texture* texture = NULL;
+static SDL_Event e;
+
+static invaders si;
+
+static bool should_quit = false;
+static int speed = 1;
+static uint32_t current_time = 0;
+static uint32_t last_time = 0;
+static uint32_t dt = 0;
 
 static void update_screen(invaders* const si) {
-    const uint32_t pitch = sizeof(uint8_t) * 4 * SCREEN_WIDTH;
-    SDL_UpdateTexture(texture, NULL, &si->screen_buffer, pitch);
+    int pitch = 0;
+    void* pixels = NULL;
+    if (SDL_LockTexture(texture, NULL, &pixels, &pitch) != 0) {
+        SDL_Log("Unable to lock texture: %s", SDL_GetError());
+    }
+    else {
+        memcpy(pixels, si->screen_buffer, pitch * SCREEN_HEIGHT);
+    }
+    SDL_UnlockTexture(texture);
 }
 
 void mainloop(void) {
+    current_time = SDL_GetTicks();
+    dt = current_time - last_time;
+
     while (SDL_PollEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
             should_quit = true;
@@ -36,7 +51,7 @@ void mainloop(void) {
             #endif
         }
         else if (e.type == SDL_KEYDOWN) {
-            const u32 key = e.key.keysym.scancode;
+            SDL_Scancode key = e.key.keysym.scancode;
             if (key == SDL_SCANCODE_C) {
                 si.port1 |= 1 << 0; // coin
             }
@@ -72,9 +87,12 @@ void mainloop(void) {
                 SDL_PushEvent(&quit_event);
                 #endif
             }
+            else if (key == SDL_SCANCODE_TAB) {
+                speed = 5;
+            }
         }
         else if (e.type == SDL_KEYUP) {
-            const u32 key = e.key.keysym.scancode;
+            SDL_Scancode key = e.key.keysym.scancode;
             if (key == SDL_SCANCODE_C) {
                 si.port1 &= 0b11111110; // coin
             }
@@ -98,6 +116,11 @@ void mainloop(void) {
             }
             else if (key == SDL_SCANCODE_T) {
                 si.port2 &= 0b11111011; // tilt
+            }
+            else if (key == SDL_SCANCODE_TAB) {
+                speed = 1;
+                // clear the queued audio to avoid audio delays
+                // SDL_ClearQueuedAudio(audio_device); // @TODO
             }
         }
         else if (e.type == SDL_JOYAXISMOTION) {
@@ -171,19 +194,16 @@ void mainloop(void) {
         }
     }
 
-    // update the game for each frame (every 1/60 seconds)
-    if (SDL_GetTicks() - timer > (1.f / FPS) * 1000) {
-        timer = SDL_GetTicks();
-        invaders_update(&si);
-        invaders_gpu_update(&si);
-    }
+    invaders_update(&si, dt * speed);
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
+
+    last_time = current_time;
 }
 
-int main(int argc, char **argv) {
+int main(void) {
     // SDL init
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
         SDL_Log("unable to initialize SDL: %s", SDL_GetError());
@@ -204,11 +224,7 @@ int main(int argc, char **argv) {
     }
 
     SDL_SetWindowMinimumSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);
-    SDL_ShowCursor(SDL_DISABLE);
-
-    // on macOS, use metal driver if available:
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+    // SDL_ShowCursor(SDL_DISABLE);
 
     // create renderer
     renderer = SDL_CreateRenderer(
@@ -240,7 +256,7 @@ int main(int argc, char **argv) {
     }
 
     // joystick init
-    SDL_Joystick *joystick = NULL;
+    SDL_Joystick* joystick = NULL;
     if (SDL_NumJoysticks() > 0) {
         joystick = SDL_JoystickOpen(0);
 
@@ -267,7 +283,6 @@ int main(int argc, char **argv) {
     if (invaders_load_rom(&si, FILE4, 0x1800) != 0) return 1;
 
     // main loop
-    timer = SDL_GetTicks();
     #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(mainloop, 0, 1);
     #else
