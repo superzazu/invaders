@@ -1,3 +1,9 @@
 [submodule "8080"]
-	path = 8080
+	path = deps/8080
 	url = https://github.com/superzazu/8080
+[submodule "deps/SDL_nmix"]
+	path = deps/SDL_nmix
+	url = https://github.com/superzazu/SDL_nmix.git
+[submodule "deps/SDL_sound"]
+	path = deps/SDL_sound
+	url = https://github.com/sezero/SDL_sound.git

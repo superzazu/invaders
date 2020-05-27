@@ -1,8 +1,6 @@
 .DS_Store
-*.o
-invaders
-res
-invaders.js
-invaders.wasm
-invaders.data
-invaders.html
+.vscode/
+build/
+build-web/
+res/
+roms/
