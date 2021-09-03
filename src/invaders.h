@@ -20,7 +20,7 @@
 typedef struct invaders invaders;
 struct invaders {
   i8080 cpu;
-  u8 memory[0x10000];
+  u8 memory[0x4000];
 
   u8 next_interrupt;
   bool colored_screen;
@@ -43,5 +43,8 @@ void invaders_update(invaders* const si, int ms);
 void invaders_gpu_update(invaders* const si);
 void invaders_play_sound(invaders* const si, u8 bank);
 int invaders_load_rom(invaders* const si, const char* filename, u16 start_addr);
+
+void invaders_get_hiscore(invaders* const si, uint8_t* value);
+void invaders_set_hiscore(invaders* const si, uint8_t value[2]);
 
 #endif // INVADERS_INVADERS_H

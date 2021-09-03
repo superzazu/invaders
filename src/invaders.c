@@ -4,10 +4,12 @@
 static u8 invaders_rb(void* userdata, u16 addr) {
   invaders* const si = (invaders*) userdata;
 
-  if (addr >= 0x6000)
+  if (addr >= 0x6000) {
     return 0;
-  if (addr >= 0x4000 && addr < 0x6000)
+  }
+  if (addr >= 0x4000 && addr < 0x6000) {
     addr -= 0x2000; // RAM mirror
+  }
 
   return si->memory[addr];
 }
@@ -89,7 +91,7 @@ static void port_out(void* userdata, u8 port, u8 value) {
 static inline NMIX_FileSource* load_sound(const char* filename) {
   SDL_RWops* f = SDL_RWFromFile(filename, "rb");
   if (f == NULL) {
-    fprintf(stderr, "Error: cannot open file %s\n", filename);
+    fprintf(stderr, "Error: cannot open sound file %s\n", filename);
     return NULL;
   }
 
@@ -352,4 +354,24 @@ int invaders_load_rom(
 
   SDL_RWclose(f);
   return 0;
+}
+
+void invaders_get_hiscore(invaders* const si, uint8_t* value) {
+  // scores are stored in RAM at 0x20F4 (high), 0x20F8 (P1) and 0x20FC (P2)
+  // (two bytes each)
+
+  const uint16_t SCORE_ADDR = 0x20F4;
+  value[0] = si->memory[SCORE_ADDR + 0];
+  value[1] = si->memory[SCORE_ADDR + 1];
+}
+
+void invaders_set_hiscore(invaders* const si, uint8_t value[2]) {
+  // at the start of game (before drawing the "status bar"), the game
+  // copies memory from $1B00-$1BBF (rom) to $2000-$20BF,
+  // so we need to update this location in memory instead of 0x20F4.
+  // see http://computerarcheology.com/Arcade/SpaceInvaders/Code.html
+
+  const uint16_t SCORE_ADDR = 0x1BF4;
+  si->memory[SCORE_ADDR + 0] = value[0];
+  si->memory[SCORE_ADDR + 1] = value[1];
 }

@@ -12,6 +12,7 @@ Features:
 - [x] two-players mode
 - [x] joystick support
 - [x] web export to HTML5 using emscripten
+- [x] high score automatically saved
 
 ## How to build it
 

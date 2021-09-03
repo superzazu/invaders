@@ -26,6 +26,7 @@ static int speed = 1;
 static uint32_t current_time = 0;
 static uint32_t last_time = 0;
 static uint32_t dt = 0;
+static char* pref_path = NULL;
 
 static void update_screen(invaders* const si) {
   int pitch = 0;
@@ -46,7 +47,7 @@ void mainloop(void) {
     if (e.type == SDL_QUIT) {
       should_quit = true;
 #ifdef __EMSCRIPTEN__
-      emscripten_exit_with_live_runtime();
+      emscripten_cancel_main_loop();
 #endif
     } else if (e.type == SDL_KEYDOWN) {
       SDL_Scancode key = e.key.keysym.scancode;
@@ -243,16 +244,58 @@ int main(void) {
   update_screen(&si);
 
   // loading roms
-  if (invaders_load_rom(&si, FILE1, 0x0000) != 0)
+  if (invaders_load_rom(&si, FILE1, 0x0000) != 0) {
     return 1;
-  if (invaders_load_rom(&si, FILE2, 0x0800) != 0)
+  }
+  if (invaders_load_rom(&si, FILE2, 0x0800) != 0) {
     return 1;
-  if (invaders_load_rom(&si, FILE3, 0x1000) != 0)
+  }
+  if (invaders_load_rom(&si, FILE3, 0x1000) != 0) {
     return 1;
-  if (invaders_load_rom(&si, FILE4, 0x1800) != 0)
+  }
+  if (invaders_load_rom(&si, FILE4, 0x1800) != 0) {
     return 1;
+  }
 
-// main loop
+  char* savefile_path = NULL;
+  char* base_path = SDL_GetPrefPath("superzazu", "invaders");
+
+  if (base_path) {
+    pref_path = base_path;
+    size_t pref_path_len = SDL_strlen(pref_path);
+
+    size_t savefile_path_len = pref_path_len + SDL_strlen("highscore.sav") + 1;
+    savefile_path = malloc(savefile_path_len);
+    if (savefile_path == NULL) {
+      return 1;
+    }
+
+    SDL_snprintf(
+        savefile_path, savefile_path_len, "%s%s", pref_path, "highscore.sav");
+  }
+
+  // load high scores
+  SDL_RWops* f = NULL;
+  f = SDL_RWFromFile(savefile_path, "rb");
+  if (f != NULL) {
+    if (SDL_RWsize(f) != 2) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Save file is corrupted");
+    } else {
+      uint8_t save[2] = {0, 0};
+      size_t read = SDL_RWread(f, &save, 1, 2);
+      if (read == 2) {
+        invaders_set_hiscore(&si, save);
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Loaded highscore (%02X%02X)",
+            save[0], save[1]);
+      } else {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to read save file");
+      }
+    }
+    SDL_RWclose(f);
+  }
+  f = NULL;
+
+  // main loop
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(mainloop, 0, 1);
 #else
@@ -260,6 +303,30 @@ int main(void) {
     mainloop();
   }
 #endif
+
+  // save high scores
+  uint8_t save[2] = {0, 0};
+  invaders_get_hiscore(&si, save);
+
+  f = SDL_RWFromFile(savefile_path, "wb");
+  if (f != NULL) {
+    size_t written = SDL_RWwrite(f, &save, 1, 2);
+    if (written == 2) {
+      SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Saved highscore (%02X%02X)",
+          save[0], save[1]);
+    } else {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to write to save file");
+    }
+    SDL_RWclose(f);
+  }
+  f = NULL;
+
+  if (base_path) {
+    SDL_free(base_path);
+  }
+  if (savefile_path) {
+    SDL_free(savefile_path);
+  }
 
   if (joystick) {
     SDL_JoystickClose(joystick);
