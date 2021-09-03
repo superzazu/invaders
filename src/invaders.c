@@ -1,7 +1,7 @@
 #include "invaders.h"
 
 // reads a byte from memory
-static u8 invaders_rb(void* userdata, u16 addr) {
+static uint8_t invaders_rb(void* userdata, uint16_t addr) {
   invaders* const si = (invaders*) userdata;
 
   if (addr >= 0x6000) {
@@ -15,7 +15,7 @@ static u8 invaders_rb(void* userdata, u16 addr) {
 }
 
 // writes a byte to memory
-static void invaders_wb(void* userdata, u16 addr, u8 val) {
+static void invaders_wb(void* userdata, uint16_t addr, uint8_t val) {
   invaders* const si = (invaders*) userdata;
 
   // the game can only write to 0x2000-0x4000
@@ -25,9 +25,9 @@ static void invaders_wb(void* userdata, u16 addr, u8 val) {
 }
 
 // port in (read)
-static u8 port_in(void* userdata, u8 port) {
+static uint8_t port_in(void* userdata, uint8_t port) {
   invaders* const si = (invaders*) userdata;
-  u8 value = 0xFF;
+  uint8_t value = 0xFF;
 
   // see https://computerarcheology.com/Arcade/SpaceInvaders/Hardware.html
   switch (port) {
@@ -44,7 +44,7 @@ static u8 port_in(void* userdata, u8 port) {
 
   case 3: { // 0003pr: SHFT_IN
     // reading from port 3 returns the shift result:
-    const u16 shift = (si->shift_msb << 8) | si->shift_lsb;
+    const uint16_t shift = (si->shift_msb << 8) | si->shift_lsb;
     value = (shift >> (8 - si->shift_offset)) & 0xFF;
   } break;
 
@@ -55,7 +55,7 @@ static u8 port_in(void* userdata, u8 port) {
 }
 
 // port out (write)
-static void port_out(void* userdata, u8 port, u8 value) {
+static void port_out(void* userdata, uint8_t port, uint8_t value) {
   invaders* const si = (invaders*) userdata;
 
   // see https://computerarcheology.com/Arcade/SpaceInvaders/Hardware.html
@@ -231,13 +231,13 @@ void invaders_gpu_update(invaders* const si) {
   for (int i = 0; i < 256 * 224 / 8; i++) {
     const int y = i * 8 / 256;
     const int base_x = (i * 8) % 256;
-    const u8 cur_byte = si->memory[VRAM_ADDR + i];
+    const uint8_t cur_byte = si->memory[VRAM_ADDR + i];
 
-    for (u8 bit = 0; bit < 8; bit++) {
+    for (uint8_t bit = 0; bit < 8; bit++) {
       int px = base_x + bit;
       int py = y;
       const bool is_pixel_lit = (cur_byte >> bit) & 1;
-      u8 r = 0, g = 0, b = 0;
+      uint8_t r = 0, g = 0, b = 0;
 
       // colour handling:
       if (!si->colored_screen && is_pixel_lit) {
@@ -279,9 +279,9 @@ void invaders_gpu_update(invaders* const si) {
   si->update_screen(si);
 }
 
-void invaders_play_sound(invaders* const si, u8 bank) {
+void invaders_play_sound(invaders* const si, uint8_t bank) {
   // plays a sound if the corresponding bit have changed from 0 to 1
-  u8 data = si->cpu.a;
+  uint8_t data = si->cpu.a;
   int sound_to_play = -1;
 
   if (bank == 1) {
@@ -330,7 +330,7 @@ void invaders_play_sound(invaders* const si, u8 bank) {
 
 // loads up a rom file at a specific address in memory (start_addr)
 int invaders_load_rom(
-    invaders* const si, const char* filename, u16 start_addr) {
+    invaders* const si, const char* filename, uint16_t start_addr) {
   SDL_RWops* f = SDL_RWFromFile(filename, "rb");
   if (f == NULL) {
     SDL_LogCritical(

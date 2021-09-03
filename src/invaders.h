@@ -20,19 +20,19 @@
 typedef struct invaders invaders;
 struct invaders {
   i8080 cpu;
-  u8 memory[0x4000];
+  uint8_t memory[0x4000];
 
-  u8 next_interrupt;
+  uint8_t next_interrupt;
   bool colored_screen;
   NMIX_FileSource* sounds[9];
 
   // SI-specific ports & shift registers that are used in IN/OUT opcodes
-  u8 port1, port2;
-  u8 shift_msb, shift_lsb, shift_offset;
-  u8 last_out_port3, last_out_port5;
+  uint8_t port1, port2;
+  uint8_t shift_msb, shift_lsb, shift_offset;
+  uint8_t last_out_port3, last_out_port5;
 
   // screen pixel buffer
-  u8 screen_buffer[SCREEN_HEIGHT][SCREEN_WIDTH][4];
+  uint8_t screen_buffer[SCREEN_HEIGHT][SCREEN_WIDTH][4];
   // function pointer provided by the user that will be called every time
   // the screen must be updated:
   void (*update_screen)(invaders* const si);
@@ -41,8 +41,9 @@ struct invaders {
 void invaders_init(invaders* const si);
 void invaders_update(invaders* const si, int ms);
 void invaders_gpu_update(invaders* const si);
-void invaders_play_sound(invaders* const si, u8 bank);
-int invaders_load_rom(invaders* const si, const char* filename, u16 start_addr);
+void invaders_play_sound(invaders* const si, uint8_t bank);
+int invaders_load_rom(
+    invaders* const si, const char* filename, uint16_t start_addr);
 
 void invaders_get_hiscore(invaders* const si, uint8_t* value);
 void invaders_set_hiscore(invaders* const si, uint8_t value[2]);
